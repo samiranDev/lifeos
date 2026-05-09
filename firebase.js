@@ -8,7 +8,7 @@
 //   appId: "YOUR_APP_ID"
 // };
 
-const firebaseConfig = {
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAZmCXfW_fcbjbEe7hPOPE8CRtWk8rPkns",
   authDomain: "nifty-jet-430708-d7.firebaseapp.com",
   projectId: "nifty-jet-430708-d7",
