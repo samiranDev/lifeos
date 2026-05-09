@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS — Personal Operating System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="ambient-bg" class="ambient-bg">
+  <canvas id="particle-canvas"></canvas>
+  <div class="mesh-gradient"></div>
+  <div class="blur-orb orb-1"></div>
+  <div class="blur-orb orb-2"></div>
+  <div class="blur-orb orb-3"></div>
+  <div class="vignette"></div>
+  <div class="noise-overlay"></div>
+</div>
+
+<div id="auth-overlay" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo-row">
+      <div class="auth-hex">⬡</div>
+      <div><div class="auth-brand">LifeOS</div><div class="auth-tagline">Personal Operating System</div></div>
+    </div>
+    <h1 class="auth-headline">Your life,<br/><span class="gradient-text">strategically mapped.</span></h1>
+    <p class="auth-sub">Visual roadmaps for every goal, dream and system. Private. Cinematic. Yours.</p>
+    <button id="google-login-btn" class="auth-google-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <button id="demo-btn" class="auth-demo-btn">⚡ Launch Demo Mode</button>
+    <div class="auth-features">
+      <span>🗺 Visual Roadmaps</span><span>📊 Analytics</span><span>🔥 Habits</span><span>💰 Finance</span>
+    </div>
+  </div>
+  <div class="auth-grid"></div>
+</div>
+
+<div id="onboarding-overlay" class="onboarding-overlay hidden">
+  <div class="onboarding-card">
+    <div class="ob-step active" data-step="0">
+      <div class="ob-icon">⬡</div>
+      <h2>Welcome to LifeOS</h2>
+      <p>Your personal mission control. Map every goal into a living visual strategy.</p>
+      <button class="ob-btn" id="ob-next-0">Begin Setup →</button>
+    </div>
+    <div class="ob-step" data-step="1">
+      <div class="ob-icon">🎯</div>
+      <h2>What's your biggest goal?</h2>
+      <input id="ob-goal-input" class="ob-input" type="text" placeholder="e.g. Financial Freedom, 100K YouTube..." />
+      <button class="ob-btn" id="ob-next-1">Continue →</button>
+    </div>
+    <div class="ob-step" data-step="2">
+      <div class="ob-icon">🚀</div>
+      <h2>Your roadmap is ready.</h2>
+      <p>Press <kbd>N</kbd> to add nodes. <kbd>Ctrl+K</kbd> for commands. Click any node to edit.</p>
+      <button class="ob-btn" id="ob-finish-btn">Enter LifeOS →</button>
+    </div>
+    <div class="ob-dots"><span class="ob-dot active"></span><span class="ob-dot"></span><span class="ob-dot"></span></div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <div class="sb-logo-mark">⬡</div>
+      <span class="sb-brand">LifeOS</span>
+      <button id="sidebar-toggle" class="sb-toggle">‹</button>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">WORKSPACES</div>
+      <div id="sb-trees"></div>
+      <button id="sb-add-tree" class="sb-add-btn"><span>+</span> New Workspace</button>
+    </div>
+    <div class="sb-divider"></div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="canvas"><span class="nav-icon">◈</span><span class="nav-label">Roadmap</span></button>
+      <button class="nav-item" data-view="timeline"><span class="nav-icon">⟿</span><span class="nav-label">Timeline</span></button>
+      <button class="nav-item" data-view="kanban"><span class="nav-icon">⊟</span><span class="nav-label">Kanban</span></button>
+      <button class="nav-item" data-view="analytics"><span class="nav-icon">◉</span><span class="nav-label">Analytics</span></button>
+      <button class="nav-item" data-view="dashboard"><span class="nav-icon">⬡</span><span class="nav-label">Dashboard</span></button>
+    </nav>
+    <div class="sb-divider"></div>
+    <nav class="sidebar-nav">
+      <div class="sb-label">TRACKERS</div>
+      <button class="nav-item" data-view="habits"><span class="nav-icon">🔥</span><span class="nav-label">Habits</span></button>
+      <button class="nav-item" data-view="finance"><span class="nav-icon">💰</span><span class="nav-label">Finance</span></button>
+      <button class="nav-item" data-view="stock-tracker"><span class="nav-icon">📦</span><span class="nav-label">Stock Assets</span></button>
+      <button class="nav-item" data-view="youtube-tracker"><span class="nav-icon">▶</span><span class="nav-label">YouTube</span></button>
+      <button class="nav-item" data-view="completed"><span class="nav-icon">✓</span><span class="nav-label">Completed</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span><span class="nav-label">Settings</span></button>
+      <div class="user-row" id="user-row">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-meta"><span class="user-name" id="user-name">Demo</span><span class="user-streak" id="user-streak">🔥 0 days</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main-content" class="main-content">
+    <div id="toolbar" class="toolbar">
+      <div class="tb-left">
+        <button id="add-node-btn" class="tb-primary" title="N">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Node
+        </button>
+        <button id="focus-mode-btn" class="tb-btn" title="F">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 9V6a1 1 0 011-1h3M3 15v3a1 1 0 001 1h3M21 9V6a1 1 0 00-1-1h-3M21 15v3a1 1 0 01-1 1h-3"/></svg> Focus
+        </button>
+      </div>
+      <div class="tb-center">
+        <button id="cmd-palette-trigger" class="tb-search">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search or command...</span><kbd>⌘K</kbd>
+        </button>
+      </div>
+      <div class="tb-right">
+        <div class="zoom-row">
+          <button id="zoom-out-btn" class="tb-icon">−</button>
+          <span id="zoom-label" class="zoom-label">100%</span>
+          <button id="zoom-in-btn" class="tb-icon">+</button>
+          <button id="zoom-fit-btn" class="tb-icon" title="Fit">⊡</button>
+        </div>
+        <div class="tb-sep"></div>
+        <button id="export-btn" class="tb-icon" title="Export">↑</button>
+        <input type="file" id="import-file" accept=".json" class="hidden-input" />
+        <button id="import-btn" class="tb-icon" title="Import">↓</button>
+        <div class="tb-sep"></div>
+        <button id="theme-cycle-btn" class="tb-icon">◑</button>
+        <div id="save-dot" class="save-dot"></div>
+      </div>
+    </div>
+
+    <div id="canvas-view" class="canvas-wrap">
+      <canvas id="mini-map" class="mini-map"></canvas>
+      <div id="canvas-container" class="canvas-container">
+        <div id="canvas-world" class="canvas-world">
+          <svg id="connections-svg" class="connections-svg"></svg>
+        </div>
+      </div>
+      <div id="tree-tabs" class="tree-tabs"></div>
+      <div class="canvas-hint">Pan · Scroll to zoom · Click node to edit</div>
+      <div id="canvas-empty" class="canvas-empty hidden">
+        <div class="empty-glyph">◈</div>
+        <h2>Start your roadmap</h2>
+        <p>Create your first goal and begin mapping your life strategy.</p>
+        <button class="tb-primary" id="canvas-empty-btn">+ Create First Node</button>
+      </div>
+    </div>
+
+    <div id="timeline-view" class="view-panel hidden">
+      <div class="view-header"><h1>Timeline</h1><p>Goals across time</p></div>
+      <div id="timeline-content" class="timeline-content"></div>
+    </div>
+    <div id="kanban-view" class="view-panel hidden">
+      <div class="view-header"><h1>Kanban Board</h1><p>Visual task management</p></div>
+      <div id="kanban-board" class="kanban-board"></div>
+    </div>
+    <div id="analytics-view" class="view-panel hidden">
+      <div class="view-header"><h1>Analytics</h1><p>Deep productivity insights</p></div>
+      <div id="analytics-content" class="analytics-content"></div>
+    </div>
+    <div id="dashboard-view" class="view-panel hidden">
+      <div class="view-header"><h1>Mission Control</h1><p>Life progress at a glance</p></div>
+      <div id="dashboard-content" class="dashboard-content"></div>
+    </div>
+    <div id="habits-view" class="view-panel hidden">
+      <div class="view-header"><h1>Habit Engine</h1><p>Consistency is the compound interest of life</p></div>
+      <div id="habits-content" class="habits-content"></div>
+    </div>
+    <div id="finance-view" class="view-panel hidden">
+      <div class="view-header"><h1>Financial System</h1><p>Every rupee tracked, every goal mapped</p></div>
+      <div id="finance-content" class="finance-content"></div>
+    </div>
+    <div id="stock-tracker-view" class="view-panel hidden">
+      <div class="view-header"><h1>Adobe Stock Tracker</h1><p>Portfolio growth engine</p></div>
+      <div id="stock-content" class="stock-content"></div>
+    </div>
+    <div id="youtube-tracker-view" class="view-panel hidden">
+      <div class="view-header"><h1>YouTube Growth System</h1><p>Channel milestones</p></div>
+      <div id="youtube-content" class="youtube-content"></div>
+    </div>
+    <div id="completed-view" class="view-panel hidden">
+      <div class="view-header"><h1>Completed Goals</h1><p>Your hall of wins</p></div>
+      <div id="completed-grid" class="node-grid"></div>
+    </div>
+    <div id="settings-view" class="view-panel hidden">
+      <div class="view-header"><h1>Settings</h1></div>
+      <div id="settings-content" class="settings-content"></div>
+    </div>
+  </main>
+
+  <div id="detail-panel" class="detail-panel closed">
+    <div class="dp-header">
+      <div class="dp-type-pill" id="dp-type-pill">Goal</div>
+      <div style="display:flex;gap:6px">
+        <button id="dp-focus-btn" class="dp-icon-btn" title="Focus">◎</button>
+        <button id="dp-close-btn" class="dp-icon-btn">✕</button>
+      </div>
+    </div>
+    <div class="dp-body">
+      <input id="dp-title" type="text" class="dp-title-input" placeholder="Node title..." />
+      <div class="dp-section"><div class="dp-label">Type</div><div class="dp-type-grid" id="dp-type-grid"></div></div>
+      <div class="dp-section">
+        <div class="dp-label">Progress</div>
+        <div class="dp-progress-row">
+          <input id="dp-current" type="number" class="dp-num-input" placeholder="0" min="0" />
+          <span class="dp-slash">/</span>
+          <input id="dp-target" type="number" class="dp-num-input" placeholder="100" min="0" />
+          <span id="dp-unit" class="dp-unit-badge">units</span>
+        </div>
+        <div class="dp-bar-wrap"><div class="dp-bar-track"><div class="dp-bar-fill" id="dp-bar-fill"></div></div><span class="dp-pct" id="dp-pct">0%</span></div>
+      </div>
+      <div class="dp-section dp-two-col">
+        <div><div class="dp-label">Priority</div><select id="dp-priority" class="dp-select"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="critical">🔴 Critical</option></select></div>
+        <div><div class="dp-label">Status</div><select id="dp-status" class="dp-select"><option value="active">Active</option><option value="paused">Paused</option><option value="blocked">Blocked</option><option value="completed">Completed</option></select></div>
+      </div>
+      <div class="dp-section dp-two-col">
+        <div><div class="dp-label">Category</div><input id="dp-category" class="dp-input" placeholder="Finance..." /></div>
+        <div><div class="dp-label">Due Date</div><input id="dp-due" type="date" class="dp-input" /></div>
+      </div>
+      <div class="dp-section"><div class="dp-label">Tags</div><input id="dp-tags" class="dp-input" placeholder="tag1, tag2" /></div>
+      <div class="dp-section"><div class="dp-label">Notes</div><textarea id="dp-notes" class="dp-textarea" placeholder="Strategy, context, next steps..."></textarea></div>
+      <div class="dp-section">
+        <div class="dp-label">Dependencies <span class="dp-hint">(unlocked when these complete)</span></div>
+        <div id="dp-deps-list" class="dp-deps-list"></div>
+        <select id="dp-add-dep" class="dp-select"><option value="">+ Add dependency...</option></select>
+      </div>
+      <div class="dp-section"><div class="dp-label">Parent Node</div><select id="dp-parent" class="dp-select"></select></div>
+      <div class="dp-section"><div class="dp-label">Mini Analytics</div><div id="dp-analytics" class="dp-analytics-box"></div></div>
+      <div class="dp-section"><div class="dp-label">Activity Log</div><div id="dp-activity" class="dp-activity-log"></div></div>
+      <div class="dp-actions">
+        <button id="dp-complete-btn" class="dp-complete-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Complete</button>
+        <button id="dp-save-btn" class="dp-save-btn">Save Changes</button>
+      </div>
+      <div class="dp-danger"><button id="dp-delete-btn" class="dp-delete-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Delete</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="cmd-overlay" class="cmd-overlay hidden">
+  <div class="cmd-card">
+    <div class="cmd-input-row">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="cmd-input" type="text" class="cmd-input" placeholder="Search nodes, run commands..." autocomplete="off" />
+      <kbd>Esc</kbd>
+    </div>
+    <div id="cmd-results" class="cmd-results"></div>
+    <div class="cmd-footer"><span><kbd>↑↓</kbd> Navigate</span><span><kbd>↵</kbd> Select</span><span><kbd>Esc</kbd> Close</span></div>
+  </div>
+</div>
+
+<div id="add-node-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-header"><h2>Create Node</h2><button class="modal-close" id="modal-cancel">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><label class="form-label">Title *</label><input id="modal-title" class="form-input" placeholder="What's your goal?" /></div>
+      <div class="form-row"><label class="form-label">Node Type</label><div class="modal-type-grid" id="modal-type-grid"></div></div>
+      <div class="form-grid-2">
+        <div class="form-row"><label class="form-label">Target Value</label><input id="modal-target" type="number" class="form-input" placeholder="100" /></div>
+        <div class="form-row"><label class="form-label">Category</label><input id="modal-category" class="form-input" placeholder="Finance..." /></div>
+      </div>
+      <div class="form-row"><label class="form-label">Parent Node</label><select id="modal-parent" class="form-select"></select></div>
+    </div>
+    <div class="modal-footer"><button class="tb-btn" id="modal-cancel-btn">Cancel</button><button id="modal-create-btn" class="tb-primary">Create Node</button></div>
+  </div>
+</div>
+
+<div id="add-tree-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-header"><h2>New Workspace</h2><button class="modal-close" id="tree-modal-close">✕</button></div>
+    <div class="modal-body"><div class="form-row"><label class="form-label">Name *</label><input id="tree-modal-name" class="form-input" placeholder="e.g. Life Roadmap..." /></div></div>
+    <div class="modal-footer"><button class="tb-btn" id="tree-modal-cancel">Cancel</button><button id="tree-modal-create" class="tb-primary">Create</button></div>
+  </div>
+</div>
+
+<div id="focus-overlay" class="focus-overlay hidden">
+  <div class="focus-bg-blur"></div>
+  <div class="focus-panel">
+    <div class="focus-header">
+      <div class="focus-breadcrumb" id="focus-breadcrumb">Goal</div>
+      <button id="focus-close-btn" class="focus-close-btn">✕ Exit Focus</button>
+    </div>
+    <div class="focus-body">
+      <div class="focus-left">
+        <div class="focus-title" id="focus-title"></div>
+        <div class="focus-type-badge" id="focus-type-badge"></div>
+        <div class="focus-ring-wrap">
+          <svg class="focus-ring-svg" viewBox="0 0 120 120">
+            <circle class="focus-ring-bg" cx="60" cy="60" r="52"/>
+            <circle class="focus-ring-arc" id="focus-ring-arc" cx="60" cy="60" r="52"/>
+          </svg>
+          <div class="focus-ring-pct" id="focus-ring-pct">0%</div>
+        </div>
+        <div class="focus-kpis" id="focus-kpis"></div>
+      </div>
+      <div class="focus-right">
+        <div class="focus-section-title">Child Goals</div>
+        <div id="focus-children" class="focus-children-list"></div>
+        <div class="focus-section-title" style="margin-top:24px">Notes</div>
+        <div id="focus-notes" class="focus-notes-box"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="celebration-overlay" class="celebration-overlay hidden">
+  <div class="celebration-inner">
+    <div class="cel-ring-wrap">
+      <svg viewBox="0 0 120 120" class="cel-ring-svg">
+        <circle class="cel-bg" cx="60" cy="60" r="52"/>
+        <circle class="cel-arc" cx="60" cy="60" r="52"/>
+      </svg>
+      <div class="cel-check">✓</div>
+    </div>
+    <h2 id="cel-title">Goal Achieved!</h2>
+    <p id="cel-sub">You're building something extraordinary.</p>
+    <div id="cel-confetti" class="cel-confetti"></div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
