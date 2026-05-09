@@ -31,7 +31,7 @@ const KANBAN_COLS = [
   { id:'completed', label:'Done',        color:'#22c55e' },
 ];
 
-const LS_KEY = 'lifeos_elite_v2';
+
 
 // ════════════════════════════════════
 // STATE
@@ -78,54 +78,12 @@ const typeColor = t => (NODE_TYPES[t]||NODE_TYPES.goal).color;
 const typeIcon  = t => (NODE_TYPES[t]||NODE_TYPES.goal).icon;
 
 // ════════════════════════════════════
-// LOCAL STORAGE
-// ════════════════════════════════════
-const DB = {
-  save() {
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify({
-        trees:S.trees, nodes:S.nodes, habits:S.habits,
-        finance:S.finance, stock:S.stock, youtube:S.youtube,
-        settings:S.settings, activityLog:S.activityLog,
-        onboardingDone:S.onboardingDone,
-      }));
-    } catch(e) { console.warn('Storage full', e); }
-  },
-  load() {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (!raw) return;
-      const d = JSON.parse(raw);
-      if (d.trees)    S.trees   = d.trees;
-      if (d.nodes)    S.nodes   = d.nodes;
-      if (d.habits)   S.habits  = d.habits;
-      if (d.finance)  S.finance = { ...S.finance, ...d.finance };
-      if (d.stock)    S.stock   = { ...S.stock, ...d.stock };
-      if (d.youtube)  S.youtube = { ...S.youtube, ...d.youtube };
-      if (d.settings) S.settings = d.settings;
-      if (d.activityLog) S.activityLog = d.activityLog;
-      if (d.onboardingDone) S.onboardingDone = d.onboardingDone;
-    } catch(e) { console.warn('DB load error', e); }
-  },
-  clear() {
-    localStorage.removeItem(LS_KEY);
-    S.trees=[]; S.nodes=[]; S.habits=[];
-    S.finance={income:0,savings:0,investments:0,debts:0,loans:0,history:[]};
-    S.stock={uploads:0,approved:0,rejected:0,earnings:0,goal:10000,dailyStreak:0,history:[]};
-    S.youtube={subscribers:0,watchHours:0,uploads:0,rpm:0,goal:100000,history:[]};
-    S.activityLog={};
-    S.onboardingDone=false;
-  }
-};
-
-// ════════════════════════════════════
-// AUTOSAVE
+// AUTOSAVE (Firestore only)
 // ════════════════════════════════════
 function scheduleSave() {
   setSaveDot('saving');
   clearTimeout(S.saveTimer);
   S.saveTimer = setTimeout(async () => {
-    DB.save();
     if (S.user && window.FIREBASE_READY && !window.DEMO_MODE) {
       try {
         const userUid = S.user.uid;
@@ -167,43 +125,11 @@ function toast(msg, type='info', dur=2800) {
 // ════════════════════════════════════
 // PARTICLES
 // ════════════════════════════════════
-function initParticles() {
-  const cv = $('particle-canvas');
-  const ctx = cv.getContext('2d');
-  let W = window.innerWidth, H = window.innerHeight;
-  cv.width = W; cv.height = H;
-  const pts = Array.from({length:70}, () => ({
-    x: Math.random()*W, y: Math.random()*H,
-    r: Math.random()*1.5+0.3,
-    vx: (Math.random()-.5)*.25, vy: (Math.random()-.5)*.25,
-    a: Math.random()*.45+.08,
-  }));
-  function draw() {
-    ctx.clearRect(0,0,W,H);
-    const isDark = document.documentElement.dataset.theme !== 'arctic';
-    const rgb = isDark ? '180,210,255' : '60,80,160';
-    pts.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
-      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
-      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle = `rgba(${rgb},${p.a})`; ctx.fill();
-    });
-    for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++) {
-      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, d=Math.sqrt(dx*dx+dy*dy);
-      if(d<110){ ctx.beginPath(); ctx.strokeStyle=`rgba(${rgb},${.04*(1-d/110)})`; ctx.lineWidth=.5; ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke(); }
-    }
-    requestAnimationFrame(draw);
-  }
-  draw();
-  window.addEventListener('resize', () => { W=window.innerWidth; H=window.innerHeight; cv.width=W; cv.height=H; });
-}
-
-// ════════════════════════════════════
 // AUTH
 // ════════════════════════════════════
 function showApp(user) {
   S.user = user;
+  hideLoader();
   $('auth-overlay').classList.add('hidden');
   if (user) {
     const av = $('user-avatar');
@@ -213,10 +139,24 @@ function showApp(user) {
   loadData();
 }
 
+function showLoader() { const l=$('app-loader'); if(l) l.classList.remove('hidden'); }
+function hideLoader() { const l=$('app-loader'); if(l) l.classList.add('hidden'); }
+
 async function initAuth() {
   FirebaseService.init();
-  if (!window.FIREBASE_READY || window.DEMO_MODE) return;
-  FirebaseService.onAuthChange(u => u ? showApp(u) : null);
+  if (!window.FIREBASE_READY || window.DEMO_MODE) {
+    hideLoader();
+    $('auth-overlay').classList.remove('hidden');
+    return;
+  }
+  FirebaseService.onAuthChange(u => {
+    if (u) {
+      showApp(u);
+    } else {
+      hideLoader();
+      $('auth-overlay').classList.remove('hidden');
+    }
+  });
 }
 
 $('google-login-btn').addEventListener('click', async () => {
@@ -230,13 +170,12 @@ $('google-login-btn').addEventListener('click', async () => {
   }
 });
 
-$('demo-btn').addEventListener('click', () => { window.DEMO_MODE=true; showApp(null); });
+$('demo-btn').addEventListener('click', () => { window.DEMO_MODE=true; hideLoader(); showApp(null); });
 
 // ════════════════════════════════════
 // DATA LOADING
 // ════════════════════════════════════
 async function loadData() {
-  DB.load();
   if (S.user && window.FIREBASE_READY && !window.DEMO_MODE) {
     try {
       const [trees, nodes, profile] = await Promise.all([
@@ -300,7 +239,6 @@ function seedDemo() {
   S.stock   = { uploads:2500, approved:2180, rejected:320, earnings:1240, goal:10000, dailyStreak:7, history:[] };
   S.youtube = { subscribers:18200, watchHours:3400, uploads:42, rpm:2.4, goal:100000, history:[] };
   S.finance = { income:12000, savings:4500, investments:2000, debts:18000, loans:2, history:[] };
-  DB.save();
 }
 
 function mkNode({id,treeId,parentId=null,type='goal',title='New Goal',cur=0,tgt=100,x=400,y=400,cat='',pri='medium',notes='',status='active',dueDate='',completed=false,deps=[],tags=''}) {
@@ -1564,7 +1502,7 @@ function renderSettings() {
     sw.addEventListener('click',()=>{ applyTheme(sw.dataset.theme); renderSettings(); });
   });
   $('settings-logout')?.addEventListener('click',async()=>{
-    await FirebaseService.signOut(); DB.save(); location.reload();
+    await FirebaseService.signOut(); location.reload();
   });
 }
 
@@ -1575,7 +1513,6 @@ function applyTheme(theme) {
   document.documentElement.dataset.theme=theme;
   S.settings.theme=theme;
   S.themeIdx=THEMES.indexOf(theme);
-  localStorage.setItem('lifeos_theme',theme);
   scheduleSave();
 }
 function cycleTheme() {
@@ -1624,9 +1561,17 @@ $('import-file').addEventListener('change',e=>{
   reader.readAsText(file);
 });
 
-function clearAllData() {
+async function clearAllData() {
   if(!confirm('Clear ALL data permanently? This cannot be undone.')) return;
-  DB.clear(); scheduleSave(); renderAll();
+  S.trees=[]; S.nodes=[]; S.habits=[];
+  S.finance={income:0,savings:0,investments:0,debts:0,loans:0,history:[]};
+  S.stock={uploads:0,approved:0,rejected:0,earnings:0,goal:10000,dailyStreak:0,history:[]};
+  S.youtube={subscribers:0,watchHours:0,uploads:0,rpm:0,goal:100000,history:[]};
+  S.activityLog={}; S.onboardingDone=false;
+  if (S.user && window.FIREBASE_READY && !window.DEMO_MODE) {
+    try { await FirebaseService.fbClearUserData(S.user.uid); } catch(e) { console.warn('Clear error', e); }
+  }
+  scheduleSave(); renderAll();
   toast('All data cleared','info');
 }
 window.clearAllData=clearAllData;
@@ -1685,16 +1630,7 @@ document.addEventListener('keydown', e => {
 // BOOT
 // ════════════════════════════════════
 (function boot() {
-  const savedTheme=localStorage.getItem('lifeos_theme')||'midnight';
-  applyTheme(savedTheme);
-  initParticles();
+  applyTheme('midnight');
   initAuth();
   setSaveDot('saved');
-
-  // If Firebase not ready after short delay, fallback to demo option
-  setTimeout(()=>{
-    if(!window.FIREBASE_READY&&!window.DEMO_MODE&&!S.user){
-      // Firebase not configured, demo mode available via button
-    }
-  },500);
 })();

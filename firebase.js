@@ -73,6 +73,18 @@ async function fbLoadAll(col, uid) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+async function fbClearUserData(uid) {
+  if (!window.FIREBASE_READY || window.DEMO_MODE) return;
+  const batch = window.fbDb.batch();
+  const cols = ['trees', 'nodes'];
+  for (const col of cols) {
+    const snap = await window.fbDb.collection(col).where('uid','==',uid).get();
+    snap.docs.forEach(d => batch.delete(d.ref));
+  }
+  batch.delete(window.fbDb.collection('userProfiles').doc(uid));
+  await batch.commit();
+}
+
 async function fbSaveProfile(uid, data) {
   if (!window.FIREBASE_READY || window.DEMO_MODE) return;
   await window.fbDb.collection('userProfiles').doc(uid).set(
@@ -87,4 +99,4 @@ async function fbGetProfile(uid) {
   return doc.exists ? { id: doc.id, ...doc.data() } : null;
 }
 
-window.FirebaseService = { init: initFirebase, signInWithGoogle, signOut, onAuthChange, fbSave, fbDelete, fbLoadAll, fbSaveProfile, fbGetProfile };
+window.FirebaseService = { init: initFirebase, signInWithGoogle, signOut, onAuthChange, fbSave, fbDelete, fbLoadAll, fbSaveProfile, fbGetProfile, fbClearUserData };
