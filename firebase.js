@@ -73,4 +73,18 @@ async function fbLoadAll(col, uid) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-window.FirebaseService = { init: initFirebase, signInWithGoogle, signOut, onAuthChange, fbSave, fbDelete, fbLoadAll };
+async function fbSaveProfile(uid, data) {
+  if (!window.FIREBASE_READY || window.DEMO_MODE) return;
+  await window.fbDb.collection('userProfiles').doc(uid).set(
+    { ...data, uid, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+}
+
+async function fbGetProfile(uid) {
+  if (!window.FIREBASE_READY || window.DEMO_MODE) return null;
+  const doc = await window.fbDb.collection('userProfiles').doc(uid).get();
+  return doc.exists ? { id: doc.id, ...doc.data() } : null;
+}
+
+window.FirebaseService = { init: initFirebase, signInWithGoogle, signOut, onAuthChange, fbSave, fbDelete, fbLoadAll, fbSaveProfile, fbGetProfile };

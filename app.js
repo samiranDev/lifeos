@@ -55,6 +55,7 @@ const S = {
   cmdFocusIdx: 0,
   themeIdx: 0,
   onboardingStep: 0,
+  onboardingDone: false,
   activityLog: {},
 };
 
@@ -86,6 +87,7 @@ const DB = {
         trees:S.trees, nodes:S.nodes, habits:S.habits,
         finance:S.finance, stock:S.stock, youtube:S.youtube,
         settings:S.settings, activityLog:S.activityLog,
+        onboardingDone:S.onboardingDone,
       }));
     } catch(e) { console.warn('Storage full', e); }
   },
@@ -102,6 +104,7 @@ const DB = {
       if (d.youtube)  S.youtube = { ...S.youtube, ...d.youtube };
       if (d.settings) S.settings = d.settings;
       if (d.activityLog) S.activityLog = d.activityLog;
+      if (d.onboardingDone) S.onboardingDone = d.onboardingDone;
     } catch(e) { console.warn('DB load error', e); }
   },
   clear() {
@@ -111,6 +114,7 @@ const DB = {
     S.stock={uploads:0,approved:0,rejected:0,earnings:0,goal:10000,dailyStreak:0,history:[]};
     S.youtube={subscribers:0,watchHours:0,uploads:0,rpm:0,goal:100000,history:[]};
     S.activityLog={};
+    S.onboardingDone=false;
   }
 };
 
@@ -124,10 +128,19 @@ function scheduleSave() {
     DB.save();
     if (S.user && window.FIREBASE_READY && !window.DEMO_MODE) {
       try {
-        const uid = S.user.uid;
+        const userUid = S.user.uid;
         await Promise.all([
-          ...S.trees.map(t => FirebaseService.fbSave('trees', {...t, uid})),
-          ...S.nodes.map(n => FirebaseService.fbSave('nodes', {...n, uid})),
+          ...S.trees.map(t => FirebaseService.fbSave('trees', {...t, uid: userUid})),
+          ...S.nodes.map(n => FirebaseService.fbSave('nodes', {...n, uid: userUid})),
+          FirebaseService.fbSaveProfile(userUid, {
+            habits: S.habits,
+            finance: S.finance,
+            stock: S.stock,
+            youtube: S.youtube,
+            settings: S.settings,
+            activityLog: S.activityLog,
+            onboardingDone: S.onboardingDone,
+          }),
         ]);
       } catch(e) { setSaveDot('error'); return; }
     }
@@ -226,17 +239,27 @@ async function loadData() {
   DB.load();
   if (S.user && window.FIREBASE_READY && !window.DEMO_MODE) {
     try {
-      const [trees, nodes] = await Promise.all([
+      const [trees, nodes, profile] = await Promise.all([
         FirebaseService.fbLoadAll('trees', S.user.uid),
         FirebaseService.fbLoadAll('nodes', S.user.uid),
+        FirebaseService.fbGetProfile(S.user.uid),
       ]);
       if (trees.length) S.trees = trees;
       if (nodes.length) S.nodes = nodes;
+      if (profile) {
+        if (profile.habits)      S.habits      = profile.habits;
+        if (profile.finance)     S.finance     = { ...S.finance, ...profile.finance };
+        if (profile.stock)       S.stock       = { ...S.stock, ...profile.stock };
+        if (profile.youtube)     S.youtube     = { ...S.youtube, ...profile.youtube };
+        if (profile.settings)    S.settings    = profile.settings;
+        if (profile.activityLog) S.activityLog = profile.activityLog;
+        if (profile.onboardingDone) S.onboardingDone = profile.onboardingDone;
+      }
     } catch(e) { console.warn('Firestore load error, using local cache:', e); }
   }
 
-  const firstTime = S.trees.length === 0;
-  if (firstTime) { seedDemo(); }
+  const firstTime = S.trees.length === 0 && !S.onboardingDone;
+  if (firstTime) { seedDemo(); scheduleSave(); }
   if (S.trees.length) S.activeTreeId = S.trees[0].id;
 
   applyTheme(S.settings.theme || 'midnight');
@@ -325,7 +348,9 @@ function advanceOnboarding(step) {
 }
 
 function finishOnboarding() {
+  S.onboardingDone = true;
   $('onboarding-overlay').classList.add('hidden');
+  scheduleSave();
   renderAll();
   setView('canvas');
   toast('Welcome to LifeOS! Press N to add your first node.', 'info', 4000);
