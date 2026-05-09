@@ -1,11 +1,21 @@
 /* LifeOS Elite — firebase.js */
-const FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+// const FIREBASE_CONFIG = {
+//   apiKey: "YOUR_API_KEY",
+//   authDomain: "YOUR_PROJECT.firebaseapp.com",
+//   projectId: "YOUR_PROJECT_ID",
+//   storageBucket: "YOUR_PROJECT.appspot.com",
+//   messagingSenderId: "YOUR_SENDER_ID",
+//   appId: "YOUR_APP_ID"
+// };
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAZmCXfW_fcbjbEe7hPOPE8CRtWk8rPkns",
+  authDomain: "nifty-jet-430708-d7.firebaseapp.com",
+  projectId: "nifty-jet-430708-d7",
+  storageBucket: "nifty-jet-430708-d7.firebasestorage.app",
+  messagingSenderId: "1035191412587",
+  appId: "1:1035191412587:web:dc5324d6afb2abbd660e2e",
+  measurementId: "G-PYN67RGG40"
 };
 
 window.FIREBASE_READY = false;
