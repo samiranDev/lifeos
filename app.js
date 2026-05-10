@@ -5,21 +5,30 @@
 // CONSTANTS
 // ════════════════════════════════════
 const NODE_TYPES = {
-  goal:        { label:'Goal',        icon:'🎯', color:'#4f8cff' },
-  milestone:   { label:'Milestone',   icon:'⭐', color:'#a855f7' },
-  financial:   { label:'Financial',   icon:'💰', color:'#22c55e' },
-  habit:       { label:'Habit',       icon:'🔥', color:'#f59e0b' },
-  achievement: { label:'Achievement', icon:'🏆', color:'#ec4899' },
-  debt:        { label:'Debt',        icon:'📉', color:'#ef4444' },
-  investment:  { label:'Investment',  icon:'📈', color:'#06b6d4' },
-  kpi:         { label:'KPI',         icon:'📊', color:'#8b5cf6' },
-  business:    { label:'Business',    icon:'🏢', color:'#f97316' },
-  task:        { label:'Task',        icon:'✅', color:'#64748b' },
-  learning:    { label:'Learning',    icon:'📚', color:'#14b8a6' },
-  health:      { label:'Health',      icon:'💪', color:'#84cc16' },
-  income:      { label:'Income',      icon:'💵', color:'#10b981' },
-  asset:       { label:'Asset',       icon:'🏠', color:'#6366f1' },
-  automation:  { label:'Automation',  icon:'⚡', color:'#e879f9' },
+  goal:        { label:'Goal',        icon:'bi-bullseye',          color:'#6366F1' },
+  milestone:   { label:'Milestone',   icon:'bi-flag-fill',         color:'#A855F7' },
+  financial:   { label:'Financial',   icon:'bi-graph-up-arrow',    color:'#22C55E' },
+  habit:       { label:'Habit',       icon:'bi-arrow-repeat',      color:'#EAB308' },
+  achievement: { label:'Achievement', icon:'bi-trophy-fill',       color:'#EC4899' },
+  debt:        { label:'Debt',        icon:'bi-exclamation-circle',color:'#EF4444' },
+  investment:  { label:'Investment',  icon:'bi-bar-chart-fill',    color:'#06B6D4' },
+  kpi:         { label:'KPI',         icon:'bi-speedometer2',      color:'#8B5CF6' },
+  business:    { label:'Business',    icon:'bi-briefcase-fill',    color:'#F97316' },
+  task:        { label:'Task',        icon:'bi-check2-square',     color:'#6B7280' },
+  learning:    { label:'Learning',    icon:'bi-book-fill',         color:'#14B8A6' },
+  health:      { label:'Health',      icon:'bi-heart-pulse-fill',  color:'#84CC16' },
+  income:      { label:'Income',      icon:'bi-currency-dollar',   color:'#10B981' },
+  asset:       { label:'Asset',       icon:'bi-building-fill',     color:'#6366F1' },
+  automation:  { label:'Automation',  icon:'bi-lightning-fill',    color:'#E879F9' },
+};
+
+const CURRENCIES = {
+  INR: { symbol:'₹', name:'Indian Rupee',  toINR: 1 },
+  USD: { symbol:'$', name:'US Dollar',     toINR: 84 },
+  EUR: { symbol:'€', name:'Euro',          toINR: 91 },
+  GBP: { symbol:'£', name:'British Pound', toINR: 107 },
+  AED: { symbol:'د.إ', name:'UAE Dirham', toINR: 22.9 },
+  SGD: { symbol:'S$', name:'Singapore $',  toINR: 63 },
 };
 
 const THEMES = ['midnight','space','arctic','cyber','aurora','neon'];
@@ -45,6 +54,7 @@ const S = {
   stock: { uploads:0, approved:0, rejected:0, earnings:0, goal:10000, dailyStreak:0, history:[] },
   youtube: { subscribers:0, watchHours:0, uploads:0, rpm:0, goal:100000, history:[] },
   settings: { theme:'midnight', accentIdx:0 },
+  baseCurrency: 'INR',
   activeTreeId: null,
   selectedNodeId: null,
   currentView: 'canvas',
@@ -75,7 +85,9 @@ const pct = (cur,tgt) => tgt>0 ? Math.min(100,Math.round(cur/tgt*100)) : 0;
 const fmtN = n => { const v=Number(n); if(isNaN(v)) return '0'; if(v>=1e6) return (v/1e6).toFixed(1)+'M'; if(v>=1000) return (v/1000).toFixed(1)+'K'; return v.toLocaleString(); };
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const typeColor = t => (NODE_TYPES[t]||NODE_TYPES.goal).color;
-const typeIcon  = t => (NODE_TYPES[t]||NODE_TYPES.goal).icon;
+const typeIcon  = t => `<i class="bi ${(NODE_TYPES[t]||NODE_TYPES.goal).icon}"></i>`;
+const currencySymbol = c => (CURRENCIES[c||'INR']||CURRENCIES.INR).symbol;
+const toINR = (val, currency) => val * ((CURRENCIES[currency||'INR']||CURRENCIES.INR).toINR);
 
 // ════════════════════════════════════
 // AUTOSAVE (Firestore only)
@@ -142,7 +154,33 @@ function showApp(user) {
 function showLoader() { const l=$('app-loader'); if(l) l.classList.remove('hidden'); }
 function hideLoader() { const l=$('app-loader'); if(l) l.classList.add('hidden'); }
 
+async function loadSharedMap(shareId) {
+  hideLoader();
+  try {
+    const doc = await window.fbDb.collection('sharedMaps').doc(shareId).get();
+    if (!doc.exists) { document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#888">Map not found or link expired.</div>'; return; }
+    const data = doc.data();
+    S.trees = [data.tree];
+    S.nodes = data.nodes;
+    S.activeTreeId = data.tree.id;
+    $('app').classList.remove('hidden');
+    // Hide sidebar controls, show read-only banner
+    document.querySelectorAll('.tb-primary,.tb-btn,.sb-new-btn,.sidebar-footer,.sb-toggle').forEach(el => el.style.display='none');
+    const banner = el('div','share-banner',`<i class="bi bi-eye"></i> Viewing <strong>${esc(data.tree.name)}</strong> by ${esc(data.ownerName)} — <a href="${location.origin}${location.pathname}" style="color:var(--ac)">Create your own LifeOS</a>`);
+    document.querySelector('.toolbar')?.prepend(banner);
+    renderCanvas(); renderMiniMap();
+    setSaveDot('saved');
+  } catch(e) {
+    console.warn('Share load error', e);
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#888">Unable to load shared map.</div>';
+  }
+}
+
 async function initAuth() {
+  // Check if viewing a shared map (read-only, no login needed)
+  const shareId = new URLSearchParams(location.search).get('share');
+  if (shareId) { loadSharedMap(shareId); return; }
+
   FirebaseService.init();
   if (!window.FIREBASE_READY || window.DEMO_MODE) {
     hideLoader();
@@ -170,7 +208,7 @@ $('google-login-btn').addEventListener('click', async () => {
   }
 });
 
-$('demo-btn').addEventListener('click', () => { window.DEMO_MODE=true; hideLoader(); showApp(null); });
+if ($('demo-btn')) $('demo-btn').addEventListener('click', () => { window.DEMO_MODE=true; hideLoader(); showApp(null); });
 
 // ════════════════════════════════════
 // DATA LOADING
@@ -198,54 +236,29 @@ async function loadData() {
   }
 
   const firstTime = S.trees.length === 0 && !S.onboardingDone;
-  if (firstTime) { seedDemo(); scheduleSave(); }
   if (S.trees.length) S.activeTreeId = S.trees[0].id;
 
   applyTheme(S.settings.theme || 'midnight');
   S.themeIdx = THEMES.indexOf(S.settings.theme || 'midnight');
 
-  if (firstTime) {
-    $('app').classList.remove('hidden');
-    showOnboarding();
-  } else {
-    $('app').classList.remove('hidden');
-    renderAll();
-    setView('canvas');
-  }
+  $('app').classList.remove('hidden');
+  renderAll();
+  setView('canvas');
 
   updateStreakDisplay();
   setSaveDot('saved');
 }
 
-function seedDemo() {
-  const treeId = uid();
-  S.trees = [{ id:treeId, name:'Life Roadmap', uid: S.user?.uid||'demo', createdAt:now() }];
-  const r=uid(), n1=uid(), n2=uid(), n3=uid(), n4=uid(), n5=uid(), n6=uid(), n7=uid();
-  S.nodes = [
-    mkNode({id:r,  treeId, parentId:null, type:'goal',      title:'Financial Freedom',        cur:12000, tgt:50000, x:1100, y:500,  cat:'Finance',  pri:'high'}),
-    mkNode({id:n1, treeId, parentId:r,   type:'income',     title:'Earn $50,000',             cur:12000, tgt:50000, x:780,  y:720,  cat:'Income',   pri:'high'}),
-    mkNode({id:n2, treeId, parentId:r,   type:'debt',       title:'Close All Loans',          cur:3,     tgt:7,     x:1400, y:720,  cat:'Finance',  pri:'high'}),
-    mkNode({id:n3, treeId, parentId:n1,  type:'financial',  title:'10K Adobe Stock Assets',   cur:2500,  tgt:10000, x:560,  y:960,  cat:'Content',  pri:'medium', tags:'adobe,content'}),
-    mkNode({id:n4, treeId, parentId:n1,  type:'kpi',        title:'100K YouTube Subscribers', cur:18200, tgt:100000,x:1020, y:960,  cat:'YouTube',  pri:'medium'}),
-    mkNode({id:n5, treeId, parentId:n3,  type:'milestone',  title:'Buy New Camera Gear',      cur:0,     tgt:1,     x:380,  y:1200, cat:'Equipment',pri:'low'}),
-    mkNode({id:n6, treeId, parentId:r,   type:'business',   title:'Launch Creative Agency',   cur:0,     tgt:1,     x:1360, y:960,  cat:'Business', pri:'high', deps:[n1,n2]}),
-    mkNode({id:n7, treeId, parentId:n4,  type:'learning',   title:'Master Video Editing',     cur:60,    tgt:100,   x:860,  y:1200, cat:'Skills',   pri:'medium'}),
-  ];
-  S.habits = [
-    { id:uid(), title:'Daily Upload', emoji:'📦', target:1, streak:7, history:[] },
-    { id:uid(), title:'YouTube Script', emoji:'✍️', target:1, streak:3, history:[] },
-    { id:uid(), title:'Workout',        emoji:'💪', target:1, streak:5, history:[] },
-  ];
-  S.stock   = { uploads:2500, approved:2180, rejected:320, earnings:1240, goal:10000, dailyStreak:7, history:[] };
-  S.youtube = { subscribers:18200, watchHours:3400, uploads:42, rpm:2.4, goal:100000, history:[] };
-  S.finance = { income:12000, savings:4500, investments:2000, debts:18000, loans:2, history:[] };
-}
-
-function mkNode({id,treeId,parentId=null,type='goal',title='New Goal',cur=0,tgt=100,x=400,y=400,cat='',pri='medium',notes='',status='active',dueDate='',completed=false,deps=[],tags=''}) {
+// ════════════════════════════════════
+// ════════════════════════════════════
+// NODE FACTORY
+// ════════════════════════════════════
+function mkNode({id,treeId,parentId=null,type='goal',title='New Goal',cur=0,tgt=100,x=400,y=400,cat='',pri='medium',notes='',status='active',dueDate='',completed=false,deps=[],tags='',currency='INR'}) {
   return { id:id||uid(), treeId, parentId, type, title,
     currentValue:+cur||0, targetValue:+tgt||100,
     progress:pct(cur,tgt), completed, status, priority:pri,
     category:cat, notes, dueDate, tags: tags||'',
+    currency: currency||'INR',
     dependencies: deps||[], positionX:+x, positionY:+y,
     createdAt:now(), updatedAt:now() };
 }
@@ -311,16 +324,75 @@ function renderSidebar() {
   if (!wrap) return;
   wrap.innerHTML = '';
   S.trees.forEach(tree => {
-    const item = el('div', `sb-tree-item${tree.id===S.activeTreeId?' active':''}`, `<span class="sb-tree-dot"></span>${esc(tree.name)}`);
+    const item = el('div', `sb-tree-item${tree.id===S.activeTreeId?' active':''}`);
     item.title = tree.name;
-    item.addEventListener('click', () => {
+    item.innerHTML = `
+      <span class="sb-tree-dot"></span>
+      <span class="sb-tree-name">${esc(tree.name)}</span>
+      <span class="sb-tree-actions">
+        <button class="sb-tree-share" title="Share map"><i class="bi bi-share"></i></button>
+        <button class="sb-tree-del" title="Delete workspace"><i class="bi bi-trash3"></i></button>
+      </span>
+    `;
+    item.querySelector('.sb-tree-name').addEventListener('click', () => {
       S.activeTreeId = tree.id;
-      renderSidebar();
-      renderCanvas();
-      renderMiniMap();
+      renderSidebar(); renderCanvas(); renderMiniMap();
+    });
+    item.querySelector('.sb-tree-dot').addEventListener('click', () => {
+      S.activeTreeId = tree.id;
+      renderSidebar(); renderCanvas(); renderMiniMap();
+    });
+    item.querySelector('.sb-tree-share').addEventListener('click', e => {
+      e.stopPropagation(); shareMap(tree.id);
+    });
+    item.querySelector('.sb-tree-del').addEventListener('click', e => {
+      e.stopPropagation(); deleteTree(tree.id);
     });
     wrap.appendChild(item);
   });
+}
+
+async function deleteTree(treeId) {
+  const tree = S.trees.find(t => t.id === treeId);
+  if (!tree) return;
+  if (!confirm(`Delete workspace "${tree.name}" and all its nodes? This cannot be undone.`)) return;
+  // Remove nodes
+  const nodeIds = S.nodes.filter(n => n.treeId === treeId).map(n => n.id);
+  S.nodes = S.nodes.filter(n => n.treeId !== treeId);
+  S.trees = S.trees.filter(t => t.id !== treeId);
+  // Delete from Firestore
+  if (S.user && window.FIREBASE_READY && !window.DEMO_MODE) {
+    try {
+      await FirebaseService.fbDelete('trees', treeId);
+      for (const nid of nodeIds) await FirebaseService.fbDelete('nodes', nid);
+    } catch(e) { console.warn('Delete tree error', e); }
+  }
+  if (S.activeTreeId === treeId) S.activeTreeId = S.trees[0]?.id || null;
+  renderSidebar(); renderCanvas(); renderMiniMap();
+  toast('Workspace deleted', 'info');
+}
+
+async function shareMap(treeId) {
+  if (!S.user || window.DEMO_MODE || !window.FIREBASE_READY) {
+    toast('Sign in to share maps', 'error'); return;
+  }
+  const tree = S.trees.find(t => t.id === treeId);
+  const nodes = S.nodes.filter(n => n.treeId === treeId);
+  const shareId = treeId; // use treeId as stable share ID
+  try {
+    await window.fbDb.collection('sharedMaps').doc(shareId).set({
+      tree, nodes,
+      ownerId: S.user.uid,
+      ownerName: S.user.displayName||'',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    const url = `${location.origin}${location.pathname}?share=${shareId}`;
+    await navigator.clipboard.writeText(url);
+    toast('Share link copied to clipboard!', 'success', 4000);
+  } catch(e) {
+    console.warn('Share error', e);
+    toast('Failed to create share link', 'error');
+  }
 }
 
 // ════════════════════════════════════
@@ -346,31 +418,54 @@ function buildNodeEl(node) {
   const color = typeColor(node.type);
   const info = NODE_TYPES[node.type]||NODE_TYPES.goal;
   const isBlocked = !!(node.dependencies||[]).length && !allDepsComplete(node);
+  const sym = currencySymbol(node.currency);
+
+  // Circular progress ring
+  const r = 17, circ = 2 * Math.PI * r;
+  const dashOffset = circ - (circ * p / 100);
 
   const d = el('div', `node${node.completed?' completed':''}${node.id===S.selectedNodeId?' selected':''}${isBlocked?' blocked':''}`);
   d.dataset.nodeId = node.id;
   d.dataset.type   = node.type;
   d.style.left = node.positionX+'px';
   d.style.top  = node.positionY+'px';
-  d.style.setProperty('--node-glow', color+'55');
   d.innerHTML = `
-    <div class="node-stripe" style="background:${color};box-shadow:0 0 8px ${color}88"></div>
-    <div class="node-header">
-      <div class="node-title">${info.icon} ${esc(node.title)}</div>
-      <div class="node-badge" style="color:${color};background:${color}18;border:1px solid ${color}30">${info.label}</div>
+    <div class="node-left-accent" style="background:${color}"></div>
+    <div class="node-inner">
+      <div class="node-ring-wrap">
+        <svg width="42" height="42" viewBox="0 0 42 42" class="node-ring-svg">
+          <circle class="node-ring-bg" cx="21" cy="21" r="${r}" fill="none" stroke-width="3"/>
+          <circle class="node-ring-arc" cx="21" cy="21" r="${r}" fill="none" stroke="${color}" stroke-width="3"
+            stroke-dasharray="${circ}" stroke-dashoffset="${dashOffset}" stroke-linecap="round"
+            transform="rotate(-90 21 21)"/>
+        </svg>
+        <div class="node-ring-pct" style="color:${color}">${p}%</div>
+      </div>
+      <div class="node-body">
+        <div class="node-title-row">
+          <div class="node-title">${esc(node.title)}</div>
+          <div class="node-status-dot ${node.status||'active'}"></div>
+        </div>
+        <div class="node-cat-label" style="color:${color}">${esc(node.category||info.label)}</div>
+        <div class="node-values">
+          <span class="node-status-text">${statusLabel(node.status)}</span>
+          <span class="node-val-text">${sym}${fmtN(node.currentValue)} / ${sym}${fmtN(node.targetValue)}</span>
+        </div>
+      </div>
     </div>
-    <div class="node-progress">
-      <div class="node-bar"><div class="node-bar-fill" style="width:${p}%;background:${color};box-shadow:0 0 6px ${color}88"></div></div>
-      <div class="node-prog-text"><span>${fmtN(node.currentValue)} / ${fmtN(node.targetValue)}</span><span style="color:${color}">${p}%</span></div>
-    </div>
-    <div class="node-done-badge">✓</div>
-    ${isBlocked ? '<div class="node-deps-lock">🔒</div>' : ''}
+    ${node.completed ? '<div class="node-done-badge"><i class="bi bi-check-lg"></i></div>' : ''}
+    ${isBlocked ? '<div class="node-deps-lock"><i class="bi bi-lock-fill"></i></div>' : ''}
   `;
 
   d.addEventListener('click', e => { e.stopPropagation(); if (!S.drag.on) selectNode(node.id); });
   d.addEventListener('mousedown', e => { if(e.target.closest('.node-deps-lock')) return; startDrag(e, node.id); });
   d.addEventListener('dblclick', e => { e.stopPropagation(); enterFocusMode(node.id); });
   return d;
+}
+
+function statusLabel(s) {
+  const m = {active:'In Progress',paused:'Paused',blocked:'Blocked',completed:'Completed'};
+  return m[s]||'Active';
 }
 
 function allDepsComplete(node) {
@@ -388,7 +483,7 @@ function renderConnections(nodes) {
   nodes.forEach(node => {
     if (!node.parentId || !map[node.parentId]) return;
     const par = map[node.parentId];
-    const W=210, H=80;
+    const W=275, H=72;
     const x1=par.positionX+W/2, y1=par.positionY+H;
     const x2=node.positionX+W/2, y2=node.positionY;
     const my=(y2-y1)*0.42;
@@ -402,7 +497,9 @@ function renderConnections(nodes) {
 
 function applyTransform() {
   const w = $('canvas-world');
-  w.style.transform = `translate(${S.canvas.x}px,${S.canvas.y}px) scale(${S.canvas.scale})`;
+  const x = Math.round(S.canvas.x);
+  const y = Math.round(S.canvas.y);
+  w.style.transform = `translate(${x}px,${y}px) scale(${S.canvas.scale})`;
   $('zoom-label').textContent = Math.round(S.canvas.scale*100)+'%';
 }
 
@@ -606,10 +703,31 @@ function openPanel(node) {
   $('dp-tags').value = node.tags||'';
 
   const info = NODE_TYPES[node.type]||NODE_TYPES.goal;
-  $('dp-type-pill').textContent = info.icon+' '+info.label;
+  $('dp-type-pill').innerHTML = `<i class="bi ${info.icon}"></i> ${info.label}`;
   $('dp-type-pill').style.background = typeColor(node.type)+'22';
   $('dp-type-pill').style.color = typeColor(node.type);
-  $('dp-unit').textContent = node.type==='financial'||node.type==='income'||node.type==='debt' ? '$' : 'units';
+  $('dp-unit').textContent = currencySymbol(node.currency||'INR');
+
+  // Populate currency selector
+  let currSel = $('dp-currency');
+  if (!currSel) {
+    const progressRow = document.querySelector('.dp-progress-row');
+    if (progressRow) {
+      currSel = document.createElement('select');
+      currSel.id = 'dp-currency';
+      currSel.className = 'dp-currency-sel';
+      Object.entries(CURRENCIES).forEach(([code,c]) => {
+        const opt = document.createElement('option');
+        opt.value = code; opt.textContent = `${c.symbol} ${code}`;
+        currSel.appendChild(opt);
+      });
+      progressRow.parentNode.insertBefore(currSel, progressRow);
+      currSel.addEventListener('change', () => {
+        $('dp-unit').textContent = currencySymbol(currSel.value);
+      });
+    }
+  }
+  if (currSel) currSel.value = node.currency||'INR';
 
   buildTypeGrid('dp-type-grid', node.type, t => {});
   updatePanelProgress();
@@ -642,7 +760,8 @@ function buildTypeGrid(containerId, activeType, onSelect) {
   if (!grid) return;
   grid.innerHTML='';
   Object.entries(NODE_TYPES).forEach(([key,info]) => {
-    const btn = el('button', `dp-type-btn${key===activeType?' active':''}`, `${info.icon} ${info.label}`);
+    const btn = el('button', `dp-type-btn${key===activeType?' active':''}`, `<i class="bi ${info.icon}"></i> ${info.label}`);
+    btn.style.setProperty('--tc', info.color);
     btn.addEventListener('click', () => {
       grid.querySelectorAll('.dp-type-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
@@ -752,12 +871,12 @@ $('dp-focus-btn').addEventListener('click', () => { if(S.selectedNodeId) enterFo
 $('dp-save-btn').addEventListener('click', () => {
   const node = S.nodes.find(n=>n.id===S.selectedNodeId);
   if (!node) return;
-  const activeType = $('dp-type-grid').querySelector('.dp-type-btn.active')?.textContent.split(' ')[1]?.toLowerCase();
-  const type = Object.keys(NODE_TYPES).find(k=>NODE_TYPES[k].label===($('dp-type-grid').querySelector('.dp-type-btn.active')?.textContent.split(' ').slice(1).join(' '))) || node.type;
+  const type = Object.keys(NODE_TYPES).find(k=>NODE_TYPES[k].label===($('dp-type-grid').querySelector('.dp-type-btn.active')?.textContent.trim().replace(/^[^\s]+\s/,''))) || node.type;
   const cur = parseFloat($('dp-current').value)||0;
   const tgt = parseFloat($('dp-target').value)||0;
   const p = pct(cur,tgt);
   const prevPct = node.progress;
+  const currency = $('dp-currency')?.value || node.currency || 'INR';
   Object.assign(node, {
     title: $('dp-title').value.trim()||node.title,
     type, currentValue:cur, targetValue:tgt, progress:p,
@@ -768,6 +887,7 @@ $('dp-save-btn').addEventListener('click', () => {
     notes: $('dp-notes').value.trim(),
     tags: $('dp-tags').value.trim(),
     parentId: $('dp-parent').value||null,
+    currency,
     updatedAt: now(),
   });
   logActivity(node.id, `Progress updated: ${prevPct}% → ${p}%`);
@@ -812,6 +932,7 @@ let _modalSelectedType = 'goal';
 
 function openAddNodeModal() {
   $('modal-title').value=''; $('modal-target').value=''; $('modal-category').value='';
+  if ($('modal-currency')) $('modal-currency').value='INR';
   _modalSelectedType='goal';
   buildTypeGrid('modal-type-grid','goal', t=>{ _modalSelectedType=t; });
   populateParentSelect('modal-parent',null,null);
@@ -837,7 +958,7 @@ $('modal-create-btn').addEventListener('click', () => {
   } else {
     const ns=currentNodes(); x=200+ns.length*18; y=200+ns.length*14;
   }
-  const node=mkNode({treeId,parentId,type:_modalSelectedType,title,tgt:parseFloat($('modal-target').value)||100,cat:$('modal-category').value.trim(),x,y});
+  const node=mkNode({treeId,parentId,type:_modalSelectedType,title,tgt:parseFloat($('modal-target').value)||100,cat:$('modal-category').value.trim(),x,y,currency:$('modal-currency')?.value||'INR'});
   S.nodes.push(node);
   logActivity(node.id,'Node created');
   scheduleSave();
@@ -891,19 +1012,19 @@ function buildCmdResults(q='') {
   S.cmdFocusIdx=0;
 
   const commands=[
-    {icon:'◈',title:'Roadmap View',sub:'Canvas',key:'canvas',kb:'1',action:()=>{setView('canvas');closeCmdPalette();}},
-    {icon:'⟿',title:'Timeline View',sub:'',key:'timeline',action:()=>{setView('timeline');closeCmdPalette();}},
-    {icon:'⊟',title:'Kanban Board',sub:'',key:'kanban',action:()=>{setView('kanban');closeCmdPalette();}},
-    {icon:'◉',title:'Analytics',sub:'',key:'analytics',action:()=>{setView('analytics');closeCmdPalette();}},
-    {icon:'⬡',title:'Dashboard',sub:'',key:'dashboard',action:()=>{setView('dashboard');closeCmdPalette();}},
-    {icon:'🔥',title:'Habits Tracker',sub:'',key:'habits',action:()=>{setView('habits');closeCmdPalette();}},
-    {icon:'💰',title:'Financial System',sub:'',key:'finance',action:()=>{setView('finance');closeCmdPalette();}},
-    {icon:'📦',title:'Stock Asset Tracker',sub:'',key:'stock',action:()=>{setView('stock-tracker');closeCmdPalette();}},
-    {icon:'▶',title:'YouTube Tracker',sub:'',key:'yt',action:()=>{setView('youtube-tracker');closeCmdPalette();}},
-    {icon:'+',title:'New Node',sub:'',key:'newnode',kb:'N',action:()=>{closeCmdPalette();openAddNodeModal();}},
-    {icon:'🔭',title:'Fit View',sub:'',key:'fit',kb:'0',action:()=>{fitView();closeCmdPalette();}},
-    {icon:'◑',title:'Cycle Theme',sub:'',key:'theme',action:()=>{cycleTheme();closeCmdPalette();}},
-    {icon:'↑',title:'Export Data',sub:'JSON',key:'export',action:()=>{exportData();closeCmdPalette();}},
+    {icon:'bi bi-diagram-2',title:'Roadmap View',sub:'Canvas',key:'canvas',kb:'1',action:()=>{setView('canvas');closeCmdPalette();}},
+    {icon:'bi bi-list-ul',title:'Timeline View',sub:'',key:'timeline',action:()=>{setView('timeline');closeCmdPalette();}},
+    {icon:'bi bi-kanban',title:'Kanban Board',sub:'',key:'kanban',action:()=>{setView('kanban');closeCmdPalette();}},
+    {icon:'bi bi-activity',title:'Analytics',sub:'',key:'analytics',action:()=>{setView('analytics');closeCmdPalette();}},
+    {icon:'bi bi-grid',title:'Dashboard',sub:'',key:'dashboard',action:()=>{setView('dashboard');closeCmdPalette();}},
+    {icon:'bi bi-arrow-repeat',title:'Habits Tracker',sub:'',key:'habits',action:()=>{setView('habits');closeCmdPalette();}},
+    {icon:'bi bi-currency-dollar',title:'Financial System',sub:'',key:'finance',action:()=>{setView('finance');closeCmdPalette();}},
+    {icon:'bi bi-images',title:'Stock Asset Tracker',sub:'',key:'stock',action:()=>{setView('stock-tracker');closeCmdPalette();}},
+    {icon:'bi bi-youtube',title:'YouTube Tracker',sub:'',key:'yt',action:()=>{setView('youtube-tracker');closeCmdPalette();}},
+    {icon:'bi bi-plus-lg',title:'New Node',sub:'',key:'newnode',kb:'N',action:()=>{closeCmdPalette();openAddNodeModal();}},
+    {icon:'bi bi-fullscreen',title:'Fit View',sub:'',key:'fit',kb:'0',action:()=>{fitView();closeCmdPalette();}},
+    {icon:'bi bi-palette',title:'Cycle Theme',sub:'',key:'theme',action:()=>{cycleTheme();closeCmdPalette();}},
+    {icon:'bi bi-download',title:'Export Data',sub:'JSON',key:'export',action:()=>{exportData();closeCmdPalette();}},
   ];
 
   const matchCmds=qlo ? commands.filter(c=>c.title.toLowerCase().includes(qlo)||c.key.includes(qlo)) : commands;
@@ -914,7 +1035,8 @@ function buildCmdResults(q='') {
     container.appendChild(lbl);
     matchCmds.slice(0,8).forEach(cmd=>{
       const item=el('div','cmd-item');
-      item.innerHTML=`<div class="cmd-item-icon">${cmd.icon}</div><div class="cmd-item-text"><div class="cmd-item-title">${cmd.title}</div>${cmd.sub?`<div class="cmd-item-sub">${cmd.sub}</div>`:''}</div>${cmd.kb?`<span class="cmd-item-kbd">${cmd.kb}</span>`:''}`;
+      const iconHtml = cmd.icon && cmd.icon.startsWith('bi ') ? `<i class="${cmd.icon}"></i>` : (cmd.icon||'');
+      item.innerHTML=`<div class="cmd-item-icon">${iconHtml}</div><div class="cmd-item-text"><div class="cmd-item-title">${cmd.title}</div>${cmd.sub?`<div class="cmd-item-sub">${cmd.sub}</div>`:''}</div>${cmd.kb?`<span class="cmd-item-kbd">${cmd.kb}</span>`:''}`;
       item.addEventListener('click',cmd.action);
       container.appendChild(item);
     });
@@ -1051,11 +1173,11 @@ function renderDashboard() {
 
   // Achievements
   const achs=[
-    {icon:'🎯',name:'First Goal',unlocked:total>=1},{icon:'🌳',name:'Strategist',unlocked:S.trees.length>=1},
-    {icon:'✅',name:'Achiever',unlocked:comp>=1},{icon:'🚀',name:'Launcher',unlocked:total>=5},
-    {icon:'💰',name:'Money Mind',unlocked:finNodes.length>=1},{icon:'🏆',name:'Champion',unlocked:comp>=3},
-    {icon:'💯',name:'Centurion',unlocked:total>=10},{icon:'⭐',name:'Star',unlocked:avgP>=50},
-    {icon:'🔥',name:'On Fire',unlocked:S.habits.some(h=>h.streak>=7)},{icon:'📦',name:'Stock Pro',unlocked:S.stock.uploads>=1000},
+    {icon:'✦',name:'First Goal',unlocked:total>=1},{icon:'◈',name:'Strategist',unlocked:S.trees.length>=1},
+    {icon:'◉',name:'Achiever',unlocked:comp>=1},{icon:'▲',name:'Launcher',unlocked:total>=5},
+    {icon:'₹',name:'Money Mind',unlocked:finNodes.length>=1},{icon:'◆',name:'Champion',unlocked:comp>=3},
+    {icon:'◎',name:'Centurion',unlocked:total>=10},{icon:'★',name:'Star',unlocked:avgP>=50},
+    {icon:'◈',name:'On Fire',unlocked:S.habits.some(h=>h.streak>=7)},{icon:'□',name:'Stock Pro',unlocked:S.stock.uploads>=1000},
   ];
   const achCard=el('div','dash-card',`<div class="dash-card-title">Achievements</div><div style="display:flex;flex-wrap:wrap;gap:10px" id="db-ach"></div>`);
   dg.appendChild(achCard);
@@ -1122,16 +1244,50 @@ function renderKanban() {
   KANBAN_COLS.forEach(col=>{
     const nodes=S.nodes.filter(n=>n.status===col.id);
     const column=el('div','kb-col');
-    column.innerHTML=`<div class="kb-col-header"><span style="color:${col.color}">${col.label}</span><span class="kb-col-count">${nodes.length}</span></div><div class="kb-cards" data-col="${col.id}"></div>`;
+    column.dataset.col=col.id;
+    column.innerHTML=`
+      <div class="kb-col-header">
+        <div class="kb-col-dot" style="background:${col.color}"></div>
+        <span>${col.label}</span>
+        <span class="kb-col-count">${nodes.length}</span>
+      </div>
+      <div class="kb-cards" data-col="${col.id}"></div>`;
     const cardsWrap=column.querySelector('.kb-cards');
+
+    // Drop zone events
+    cardsWrap.addEventListener('dragover', e=>{ e.preventDefault(); cardsWrap.classList.add('kb-drop-over'); });
+    cardsWrap.addEventListener('dragleave', ()=>{ cardsWrap.classList.remove('kb-drop-over'); });
+    cardsWrap.addEventListener('drop', e=>{
+      e.preventDefault(); cardsWrap.classList.remove('kb-drop-over');
+      const nodeId=e.dataTransfer.getData('text/plain');
+      const node=S.nodes.find(n=>n.id===nodeId);
+      if(node && node.status!==col.id){
+        node.status=col.id;
+        scheduleSave(); renderKanban();
+        toast(`Moved to ${col.label}`, 'info', 1500);
+      }
+    });
+
     nodes.forEach(n=>{
       const p=pct(n.currentValue,n.targetValue), color=typeColor(n.type);
+      const sym=currencySymbol(n.currency);
       const card=el('div','kb-card');
+      card.draggable=true;
       card.innerHTML=`
-        <div style="height:2px;background:${color};border-radius:99px;margin-bottom:10px"></div>
-        <div class="kb-card-title">${typeIcon(n.type)} ${esc(n.title)}</div>
-        <div class="kb-card-bar"><div class="kb-card-fill" style="width:${p}%;background:${color}"></div></div>
-        <div class="kb-card-meta"><span>${n.priority||'medium'}</span><span style="color:${color}">${p}%</span>${n.dueDate?`<span>📅 ${n.dueDate}</span>`:''}</div>`;
+        <div class="kb-card-accent" style="background:${color}"></div>
+        <div class="kb-card-body">
+          <div class="kb-card-title">${esc(n.title)}</div>
+          <div class="kb-card-cat" style="color:${color}">${esc(n.category||NODE_TYPES[n.type]?.label||'')}</div>
+          <div class="kb-card-bar"><div class="kb-card-fill" style="width:${p}%;background:${color}"></div></div>
+          <div class="kb-card-meta">
+            <span class="kb-priority kb-priority-${n.priority||'medium'}">${n.priority||'medium'}</span>
+            <span style="font-family:var(--font-m);font-size:11px;color:${color}">${p}%</span>
+            ${n.dueDate?`<span style="color:var(--tx-3);font-size:11px"><i class="bi bi-calendar3"></i> ${n.dueDate}</span>`:''}
+          </div>
+          <div class="kb-card-val">${sym}${fmtN(n.currentValue)} / ${sym}${fmtN(n.targetValue)}</div>
+        </div>`;
+      card.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', n.id); card.classList.add('kb-dragging'); });
+      card.addEventListener('dragend', ()=>{ card.classList.remove('kb-dragging'); });
       card.addEventListener('click',()=>{ setView('canvas'); S.activeTreeId=n.treeId; renderCanvas(); setTimeout(()=>{selectNode(n.id);centerOn(n);},80); });
       cardsWrap.appendChild(card);
     });
@@ -1145,11 +1301,55 @@ function renderKanban() {
 function renderAnalytics() {
   const ac=$('analytics-content'); if(!ac)return;
   const nodes=S.nodes;
+
+  // ── Currency Summary (convert all to INR) ──
+  const totalINR = nodes.reduce((sum, n) => sum + toINR(n.currentValue||0, n.currency), 0);
+  const targetINR = nodes.reduce((sum, n) => sum + toINR(n.targetValue||0, n.currency), 0);
+  const currencyBreakdown = {};
+  nodes.forEach(n => {
+    const c = n.currency||'INR';
+    if (!currencyBreakdown[c]) currencyBreakdown[c] = {current:0, target:0, count:0};
+    currencyBreakdown[c].current += n.currentValue||0;
+    currencyBreakdown[c].target += n.targetValue||0;
+    currencyBreakdown[c].count++;
+  });
+  const currRow = el('div','analytics-currency-row');
+  currRow.innerHTML = `
+    <div class="analytics-card" style="grid-column:1/-1">
+      <div class="analytics-card-title">Portfolio Value — All currencies converted to INR</div>
+      <div class="currency-summary-grid">
+        <div class="currency-big-stat">
+          <div class="currency-big-val">₹${fmtN(totalINR)}</div>
+          <div class="currency-big-label">Total Progress (INR)</div>
+        </div>
+        <div class="currency-big-stat">
+          <div class="currency-big-val" style="color:var(--tx-2)">₹${fmtN(targetINR)}</div>
+          <div class="currency-big-label">Total Target (INR)</div>
+        </div>
+        <div class="currency-big-stat">
+          <div class="currency-big-val" style="color:var(--ac)">${targetINR>0?Math.round(totalINR/targetINR*100):0}%</div>
+          <div class="currency-big-label">Overall Completion</div>
+        </div>
+      </div>
+      ${Object.keys(currencyBreakdown).length > 1 ? `
+      <div class="currency-breakdown">
+        ${Object.entries(currencyBreakdown).map(([code,d])=>`
+          <div class="currency-breakdown-item">
+            <span class="currency-code">${code}</span>
+            <span class="currency-sym">${(CURRENCIES[code]||CURRENCIES.INR).symbol}</span>
+            <span>${fmtN(d.current)} / ${fmtN(d.target)}</span>
+            <span class="currency-inr-val">≈ ₹${fmtN(toINR(d.current,code))}</span>
+            <span class="currency-count">${d.count} node${d.count>1?'s':''}</span>
+          </div>`).join('')}
+      </div>` : ''}
+    </div>`;
+  ac.innerHTML = '';
+  ac.appendChild(currRow);
+
   const typeCounts={};
   Object.keys(NODE_TYPES).forEach(k=>typeCounts[k]=nodes.filter(n=>n.type===k).length);
   const typeSorted=Object.entries(typeCounts).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
 
-  ac.innerHTML='';
   const row1=el('div','analytics-row');
 
   // Type distribution bar chart
@@ -1249,17 +1449,27 @@ function renderHabits() {
     const card=el('div','habit-card');
     const todayDone=(habit.history||[]).includes(today);
     card.innerHTML=`
-      <div class="habit-emoji">${habit.emoji}</div>
+      <div class="habit-icon-wrap"><i class="bi bi-arrow-repeat"></i></div>
       <div class="habit-info">
-        <div class="habit-title">${esc(habit.title)}</div>
-        <div class="habit-meta">Target: daily · ${todayDone?'✅ Done today':'⏳ Pending'}</div>
+        <div class="habit-title-row">
+          <div class="habit-title">${esc(habit.title)}</div>
+          <button class="habit-del-btn" data-id="${habit.id}" title="Delete habit"><i class="bi bi-trash3"></i></button>
+        </div>
+        <div class="habit-meta">Daily · ${todayDone?'<span class="habit-done-tag">Done today</span>':'<span class="habit-pending-tag">Pending</span>'}</div>
         <div class="habit-checkboxes">${[...Array(7)].map((_,i)=>{
           const d=new Date(); d.setDate(d.getDate()-6+i);
           const done=(habit.history||[]).includes(d.toDateString());
-          return `<div class="habit-day${done?' done':''}" data-habit="${habit.id}" data-date="${d.toDateString()}">${done?'✓':''}</div>`;
+          const label=['S','M','T','W','T','F','S'][(d.getDay())];
+          return `<div class="habit-day-wrap"><div class="habit-day${done?' done':''}" data-habit="${habit.id}" data-date="${d.toDateString()}">${done?'<i class="bi bi-check-lg"></i>':''}</div><span class="habit-day-label">${label}</span></div>`;
         }).join('')}</div>
       </div>
-      <div class="habit-streak">${habit.streak||0}<div style="font-size:12px;font-weight:400;color:var(--text-2)">streak</div></div>`;
+      <div class="habit-streak-col"><div class="habit-streak">${habit.streak||0}</div><div class="habit-streak-label">day streak</div></div>`;
+    card.querySelector('.habit-del-btn').addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm(`Delete habit "${habit.title}"?`)) return;
+      S.habits=S.habits.filter(h=>h.id!==habit.id);
+      scheduleSave(); renderHabits();
+    });
     card.querySelectorAll('.habit-day').forEach(dayEl=>{
       dayEl.addEventListener('click',()=>{
         const h=S.habits.find(h=>h.id===dayEl.dataset.habit);
@@ -1275,14 +1485,11 @@ function renderHabits() {
     hc.appendChild(card);
   });
 
-  // Add habit button
-  const addBtn=el('div','habit-add-btn','<span style="font-size:20px">+</span> Track New Habit');
+  const addBtn=el('div','habit-add-btn',`<i class="bi bi-plus-lg"></i> Track New Habit`);
   addBtn.addEventListener('click',()=>{
-    const title=prompt('Habit name (with emoji, e.g. "📦 Daily Upload"):');
+    const title=prompt('Habit name (e.g. "Morning Workout"):');
     if(!title) return;
-    const parts=title.trim().split(' ');
-    const emoji=parts[0]; const name=parts.slice(1).join(' ')||parts[0];
-    S.habits.push({id:uid(),title:name.trim()||title,emoji,target:1,streak:0,history:[]});
+    S.habits.push({id:uid(),title:title.trim(),target:1,streak:0,history:[]});
     scheduleSave(); renderHabits();
   });
   hc.appendChild(addBtn);
@@ -1290,8 +1497,8 @@ function renderHabits() {
 
 function updateStreakDisplay() {
   const maxStreak=Math.max(0,...S.habits.map(h=>h.streak||0));
-  const el=$('user-streak');
-  if(el) el.textContent=`🔥 ${maxStreak} day${maxStreak===1?'':'s'}`;
+  const streakEl=$('user-streak');
+  if(streakEl) streakEl.textContent=`${maxStreak} day streak`;
 }
 
 // ════════════════════════════════════
@@ -1361,7 +1568,7 @@ function renderStockTracker() {
       <div class="tracker-stat"><div class="tracker-stat-val" style="color:var(--danger)">${fmtN(s.rejected)}</div><div class="tracker-stat-label">Rejected</div></div>
       <div class="tracker-stat"><div class="tracker-stat-val" style="color:#22c55e">₹${fmtN(s.earnings)}</div><div class="tracker-stat-label">Earnings</div></div>
       <div class="tracker-stat"><div class="tracker-stat-val">${approvalRate}%</div><div class="tracker-stat-label">Approval Rate</div></div>
-      <div class="tracker-stat"><div class="tracker-stat-val" style="color:var(--warning)">🔥 ${s.dailyStreak}</div><div class="tracker-stat-label">Day Streak</div></div>
+      <div class="tracker-stat"><div class="tracker-stat-val" style="color:var(--warning)">${s.dailyStreak}</div><div class="tracker-stat-label">Day Streak</div></div>
     </div>
     <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-l);padding:18px;margin-bottom:16px">
       <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-2);margin-bottom:10px">Goal Progress</div>
@@ -1535,31 +1742,7 @@ function exportData() {
 }
 window.exportData=exportData;
 
-$('export-btn').addEventListener('click',exportData);
-$('import-btn').addEventListener('click',()=>$('import-file').click());
-$('import-file').addEventListener('change',e=>{
-  const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    try {
-      const data=JSON.parse(ev.target.result);
-      if(!data.trees||!data.nodes) throw new Error('Invalid format');
-      if(!confirm(`Import ${data.trees.length} trees and ${data.nodes.length} nodes?`)) return;
-      const existT=new Set(S.trees.map(t=>t.id));
-      const existN=new Set(S.nodes.map(n=>n.id));
-      data.trees.forEach(t=>{if(!existT.has(t.id))S.trees.push(t);});
-      data.nodes.forEach(n=>{if(!existN.has(n.id))S.nodes.push(n);});
-      if(data.habits) S.habits=[...S.habits,...(data.habits||[])];
-      if(data.finance) S.finance={...S.finance,...data.finance};
-      if(data.stock) S.stock={...S.stock,...data.stock};
-      if(data.youtube) S.youtube={...S.youtube,...data.youtube};
-      scheduleSave(); renderAll();
-      toast(`Imported ${data.nodes.length} nodes`,'success');
-    } catch(e){toast('Import failed: '+e.message,'error');}
-    $('import-file').value='';
-  };
-  reader.readAsText(file);
-});
+if($('export-btn')) $('export-btn').addEventListener('click',exportData);
 
 async function clearAllData() {
   if(!confirm('Clear ALL data permanently? This cannot be undone.')) return;
