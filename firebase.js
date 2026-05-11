@@ -1,18 +1,41 @@
 /* LifeOS — firebase.js */
 'use strict';
 
+/* ADD YOUR FIREBASE CONFIG HERE */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAZmCXfW_fcbjbEe7hPOPE8CRtWk8rPkns",
+  authDomain: "nifty-jet-430708-d7.firebaseapp.com",
+  projectId: "nifty-jet-430708-d7",
+  storageBucket: "nifty-jet-430708-d7.firebasestorage.app",
+  messagingSenderId: "1035191412587",
+  appId: "1:1035191412587:web:dc5324d6afb2abbd660e2e",
+  measurementId: "G-PYN67RGG40"
+};
+
 function initFirebase() {
-  if (typeof firebase === 'undefined' || window.FIREBASE_READY) return;
-  try {
-    firebase.app();
-  } catch(e) {
-    console.warn('Firebase not configured. Add your config to firebase.js');
+
+  if (typeof firebase === 'undefined') {
+    console.error('Firebase SDK not loaded');
     return;
   }
+
+  /* Prevent double init */
+  if (!firebase.apps.length) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+  }
+
   window.fbAuth = firebase.auth();
   window.fbDb   = firebase.firestore();
-  window.fbDb.enablePersistence({ synchronizeTabs:true }).catch(()=>{});
+
+  window.fbDb.enablePersistence({
+    synchronizeTabs: true
+  }).catch((err) => {
+    console.log(err);
+  });
+
   window.FIREBASE_READY = true;
+
+  console.log('Firebase Connected ✅');
 }
 
 function signInWithGoogle() {
