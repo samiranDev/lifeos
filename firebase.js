@@ -1,51 +1,28 @@
-/* LifeOS Elite — firebase.js */
-// const FIREBASE_CONFIG = {
-//   apiKey: "YOUR_API_KEY",
-//   authDomain: "YOUR_PROJECT.firebaseapp.com",
-//   projectId: "YOUR_PROJECT_ID",
-//   storageBucket: "YOUR_PROJECT.appspot.com",
-//   messagingSenderId: "YOUR_SENDER_ID",
-//   appId: "YOUR_APP_ID"
-// };
-
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAZmCXfW_fcbjbEe7hPOPE8CRtWk8rPkns",
-  authDomain: "nifty-jet-430708-d7.firebaseapp.com",
-  projectId: "nifty-jet-430708-d7",
-  storageBucket: "nifty-jet-430708-d7.firebasestorage.app",
-  messagingSenderId: "1035191412587",
-  appId: "1:1035191412587:web:dc5324d6afb2abbd660e2e",
-  measurementId: "G-PYN67RGG40"
-};
-
-window.FIREBASE_READY = false;
-window.DEMO_MODE = false;
+/* LifeOS — firebase.js */
+'use strict';
 
 function initFirebase() {
+  if (typeof firebase === 'undefined' || window.FIREBASE_READY) return;
   try {
-    if (typeof firebase === 'undefined') { window.DEMO_MODE = true; return null; }
-    if (firebase.apps.length === 0) firebase.initializeApp(FIREBASE_CONFIG);
-    window.fbAuth = firebase.auth();
-    window.fbDb = firebase.firestore();
-    window.fbDb.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-    window.FIREBASE_READY = true;
-    return { auth: window.fbAuth, db: window.fbDb };
+    firebase.app();
   } catch(e) {
-    console.error('Firebase init error:', e);
-    window.DEMO_MODE = true;
-    return null;
+    console.warn('Firebase not configured. Add your config to firebase.js');
+    return;
   }
+  window.fbAuth = firebase.auth();
+  window.fbDb   = firebase.firestore();
+  window.fbDb.enablePersistence({ synchronizeTabs:true }).catch(()=>{});
+  window.FIREBASE_READY = true;
 }
 
-async function signInWithGoogle() {
-  if (!window.FIREBASE_READY) throw new Error('Firebase not ready');
+function signInWithGoogle() {
+  if (!window.FIREBASE_READY) return Promise.reject('Firebase not ready');
   const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: 'select_account' });
-  return (await window.fbAuth.signInWithPopup(provider)).user;
+  return firebase.auth().signInWithPopup(provider);
 }
 
-async function signOut() {
-  if (window.FIREBASE_READY) await window.fbAuth.signOut();
+function signOut() {
+  return window.FIREBASE_READY ? firebase.auth().signOut() : Promise.resolve();
 }
 
 function onAuthChange(cb) {
@@ -53,50 +30,89 @@ function onAuthChange(cb) {
   return window.fbAuth.onAuthStateChanged(cb);
 }
 
-async function fbSave(col, doc) {
-  if (!window.FIREBASE_READY || window.DEMO_MODE) return doc;
-  const ref = doc.id ? window.fbDb.collection(col).doc(doc.id) : window.fbDb.collection(col).doc();
-  const data = { ...doc, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-  if (!doc.id) data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-  await ref.set(data, { merge: true });
-  return { ...doc, id: ref.id };
-}
-
-async function fbDelete(col, id) {
-  if (!window.FIREBASE_READY || window.DEMO_MODE) return;
-  await window.fbDb.collection(col).doc(id).delete();
-}
-
-async function fbLoadAll(col, uid) {
-  if (!window.FIREBASE_READY || window.DEMO_MODE) return [];
-  const snap = await window.fbDb.collection(col).where('uid','==',uid).get();
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
-
-async function fbClearUserData(uid) {
-  if (!window.FIREBASE_READY || window.DEMO_MODE) return;
-  const batch = window.fbDb.batch();
-  const cols = ['trees', 'nodes'];
-  for (const col of cols) {
-    const snap = await window.fbDb.collection(col).where('uid','==',uid).get();
-    snap.docs.forEach(d => batch.delete(d.ref));
-  }
-  batch.delete(window.fbDb.collection('userProfiles').doc(uid));
-  await batch.commit();
-}
-
-async function fbSaveProfile(uid, data) {
-  if (!window.FIREBASE_READY || window.DEMO_MODE) return;
-  await window.fbDb.collection('userProfiles').doc(uid).set(
-    { ...data, uid, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+// ── Generic CRUD ──
+async function fbSet(col, docId, data) {
+  if (!window.FIREBASE_READY) return;
+  await window.fbDb.collection(col).doc(docId).set(
+    { ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
     { merge: true }
   );
 }
 
-async function fbGetProfile(uid) {
-  if (!window.FIREBASE_READY || window.DEMO_MODE) return null;
-  const doc = await window.fbDb.collection('userProfiles').doc(uid).get();
-  return doc.exists ? { id: doc.id, ...doc.data() } : null;
+async function fbGet(col, docId) {
+  if (!window.FIREBASE_READY) return null;
+  const d = await window.fbDb.collection(col).doc(docId).get();
+  return d.exists ? { id: d.id, ...d.data() } : null;
 }
 
-window.FirebaseService = { init: initFirebase, signInWithGoogle, signOut, onAuthChange, fbSave, fbDelete, fbLoadAll, fbSaveProfile, fbGetProfile, fbClearUserData };
+async function fbGetAll(col) {
+  if (!window.FIREBASE_READY) return [];
+  const snap = await window.fbDb.collection(col).get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function fbDelete(col, docId) {
+  if (!window.FIREBASE_READY) return;
+  await window.fbDb.collection(col).doc(docId).delete();
+}
+
+// ── User sub-collection helpers ──
+function userCol(uid, sub) {
+  return window.fbDb.collection('users').doc(uid).collection(sub);
+}
+
+async function saveProfile(uid, data) {
+  if (!window.FIREBASE_READY) return;
+  await window.fbDb.collection('users').doc(uid).set(
+    { ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+}
+
+async function loadProfile(uid) {
+  if (!window.FIREBASE_READY) return null;
+  const d = await window.fbDb.collection('users').doc(uid).get();
+  return d.exists ? d.data() : null;
+}
+
+async function saveToSub(uid, sub, docId, data) {
+  if (!window.FIREBASE_READY) return;
+  await userCol(uid, sub).doc(docId).set(
+    { ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+}
+
+async function deleteFromSub(uid, sub, docId) {
+  if (!window.FIREBASE_READY) return;
+  await userCol(uid, sub).doc(docId).delete();
+}
+
+async function loadSub(uid, sub) {
+  if (!window.FIREBASE_READY) return [];
+  const snap = await userCol(uid, sub).get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// ── Shared maps ──
+async function saveSharedMap(shareId, data) {
+  if (!window.FIREBASE_READY) return;
+  await window.fbDb.collection('sharedMaps').doc(shareId).set(
+    { ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+}
+
+async function loadSharedMap(shareId) {
+  if (!window.FIREBASE_READY) return null;
+  const d = await window.fbDb.collection('sharedMaps').doc(shareId).get();
+  return d.exists ? d.data() : null;
+}
+
+window.FB = {
+  init: initFirebase, signInWithGoogle, signOut, onAuthChange,
+  fbSet, fbGet, fbGetAll, fbDelete,
+  saveProfile, loadProfile,
+  saveToSub, deleteFromSub, loadSub,
+  saveSharedMap, loadSharedMap,
+};

@@ -1,47 +1,36 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="midnight">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>LifeOS — Personal Operating System</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
+<!-- LOADER -->
 <div id="app-loader" class="app-loader">
-  <div class="loader-inner">
-    <div class="loader-brand">
-      <div class="loader-icon">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <circle cx="10" cy="10" r="3.5" fill="currentColor"/>
-          <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="2.5 2.5"/>
-          <circle cx="10" cy="10" r="9.5" stroke="currentColor" stroke-width="0.75" fill="none" opacity="0.4"/>
-        </svg>
-      </div>
-      <span class="loader-wordmark">LifeOS</span>
-    </div>
-    <div class="loader-track"><div class="loader-fill"></div></div>
+  <div class="loader-brand">
+    <div class="loader-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.5" fill="currentColor"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="2.5 2.5"/><circle cx="10" cy="10" r="9.5" stroke="currentColor" stroke-width="0.75" fill="none" opacity="0.4"/></svg></div>
+    <span class="loader-wordmark">LifeOS</span>
   </div>
+  <div class="loader-track"><div class="loader-fill"></div></div>
 </div>
 
+<!-- AUTH -->
 <div id="auth-overlay" class="auth-overlay hidden">
   <div class="auth-bg-grid"></div>
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-icon">
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-          <circle cx="10" cy="10" r="3.5" fill="currentColor"/>
-          <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="2.5 2.5"/>
-        </svg>
-      </div>
+      <div class="auth-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.5" fill="currentColor"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="2.5 2.5"/></svg></div>
       <span class="auth-wordmark">LifeOS</span>
     </div>
     <div class="auth-copy">
-      <h1 class="auth-headline">Your life,<br><em>strategically mapped.</em></h1>
-      <p class="auth-sub">Visual goal roadmaps, habit tracking, and financial systems — all in one private workspace.</p>
+      <h1 class="auth-headline">Your life,<br><em>intelligently managed.</em></h1>
+      <p class="auth-sub">Financial intelligence, strategic planning, and AI-powered insights — unified.</p>
     </div>
     <div class="auth-actions">
       <button id="google-login-btn" class="auth-google-btn">
@@ -53,374 +42,291 @@
   </div>
 </div>
 
-<div id="onboarding-overlay" class="onboarding-overlay hidden">
-  <div class="onboarding-card">
-    <div class="ob-step active" data-step="0">
-      <div class="ob-glyph">
-        <svg width="32" height="32" viewBox="0 0 20 20" fill="none">
-          <circle cx="10" cy="10" r="3.5" fill="var(--ac)"/>
-          <circle cx="10" cy="10" r="7" stroke="var(--ac)" stroke-width="1.5" fill="none" stroke-dasharray="2.5 2.5"/>
-          <circle cx="10" cy="10" r="9.5" stroke="var(--ac)" stroke-width="0.75" fill="none" opacity="0.5"/>
-        </svg>
-      </div>
-      <h2>Welcome to LifeOS</h2>
-      <p>Map every goal into a living visual strategy. Your private mission control.</p>
-      <button class="ob-btn" id="ob-next-0">Get started →</button>
-    </div>
-    <div class="ob-step" data-step="1">
-      <div class="ob-glyph">🎯</div>
-      <h2>What's your primary goal?</h2>
-      <input id="ob-goal-input" class="ob-input" type="text" placeholder="e.g. Financial Freedom, 100K YouTube…" />
-      <button class="ob-btn" id="ob-next-1">Continue →</button>
-    </div>
-    <div class="ob-step" data-step="2">
-      <div class="ob-glyph">✦</div>
-      <h2>Your workspace is ready.</h2>
-      <p>Press <kbd>N</kbd> to add goals. <kbd>⌘K</kbd> for commands. Click any node to edit.</p>
-      <button class="ob-btn" id="ob-finish-btn">Open LifeOS →</button>
-    </div>
-    <div class="ob-dots">
-      <span class="ob-dot active"></span><span class="ob-dot"></span><span class="ob-dot"></span>
-    </div>
-  </div>
-</div>
-
+<!-- APP SHELL -->
 <div id="app" class="app hidden">
 
+  <!-- SIDEBAR -->
   <aside id="sidebar" class="sidebar">
-    <div class="sidebar-header">
+    <div class="sb-header">
       <div class="sb-logo">
-        <div class="sb-icon">
-          <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="3.5" fill="currentColor"/>
-            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="2.5 2.5"/>
-          </svg>
-        </div>
+        <div class="sb-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.5" fill="currentColor"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="2.5 2.5"/></svg></div>
         <span class="sb-wordmark">LifeOS</span>
       </div>
-      <button id="sidebar-toggle" class="sb-toggle" title="Toggle sidebar">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
+      <button id="sb-collapse" class="sb-collapse-btn" title="Collapse"><i class="bi bi-layout-sidebar"></i></button>
     </div>
 
-    <div class="sb-section">
-      <div class="sb-label">Workspaces</div>
-      <div id="sb-trees"></div>
-      <button id="sb-add-tree" class="sb-new-btn">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        New workspace
-      </button>
+    <div class="sb-scroll">
+      <!-- GLOBAL NAV -->
+      <div class="sb-group">
+        <div class="sb-group-label">Global</div>
+        <nav class="sb-nav" id="global-nav">
+          <button class="nav-btn active" data-view="global-dashboard"><i class="bi bi-grid-1x2-fill nav-ico"></i><span class="nav-lbl">Dashboard</span></button>
+          <button class="nav-btn" data-view="financial-overview"><i class="bi bi-graph-up-arrow nav-ico"></i><span class="nav-lbl">Financial Overview</span></button>
+          <button class="nav-btn" data-view="calendar"><i class="bi bi-calendar3 nav-ico"></i><span class="nav-lbl">Calendar</span></button>
+          <button class="nav-btn" data-view="notifications"><i class="bi bi-bell nav-ico"></i><span class="nav-lbl">Notifications</span><span class="nav-badge" id="notif-badge" style="display:none"></span></button>
+          <button class="nav-btn" data-view="search"><i class="bi bi-search nav-ico"></i><span class="nav-lbl">Search</span></button>
+        </nav>
+      </div>
+
+      <div class="sb-divider"></div>
+
+      <!-- WORKSPACES -->
+      <div class="sb-group">
+        <div class="sb-group-label">Workspaces</div>
+        <div id="sb-workspaces" class="sb-workspaces"></div>
+        <button id="sb-add-ws" class="sb-add-btn"><i class="bi bi-plus-lg"></i><span class="nav-lbl"> New Workspace</span></button>
+      </div>
     </div>
 
-    <div class="sb-divider"></div>
-
-    <nav class="sb-nav">
-      <button class="nav-item active" data-view="canvas">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="5" y2="17"/><line x1="12" y1="7" x2="19" y2="17"/></svg>
-        <span class="nav-label">Roadmap</span>
-      </button>
-      <button class="nav-item" data-view="timeline">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="16" y2="12"/><line x1="3" y1="18" x2="12" y2="18"/></svg>
-        <span class="nav-label">Timeline</span>
-      </button>
-      <button class="nav-item" data-view="kanban">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
-        <span class="nav-label">Kanban</span>
-      </button>
-      <button class="nav-item" data-view="analytics">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span class="nav-label">Analytics</span>
-      </button>
-      <button class="nav-item" data-view="dashboard">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        <span class="nav-label">Dashboard</span>
-      </button>
-    </nav>
-
-    <div class="sb-divider"></div>
-
-    <nav class="sb-nav">
-      <div class="sb-label">Trackers</div>
-      <button class="nav-item" data-view="habits">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-        <span class="nav-label">Habits</span>
-      </button>
-      <button class="nav-item" data-view="finance">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-        <span class="nav-label">Finance</span>
-      </button>
-      <button class="nav-item" data-view="stock-tracker">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17 14v7"/></svg>
-        <span class="nav-label">Stock Assets</span>
-      </button>
-      <button class="nav-item" data-view="youtube-tracker">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96C1 8.14 1 12 1 12s0 3.86.46 5.58a2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96C23 15.86 23 12 23 12s0-3.86-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
-        <span class="nav-label">YouTube</span>
-      </button>
-      <button class="nav-item" data-view="completed">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
-        <span class="nav-label">Completed</span>
-      </button>
-    </nav>
-
-    <div class="sidebar-footer">
-      <button class="nav-item" data-view="settings">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-        <span class="nav-label">Settings</span>
-      </button>
-      <div class="user-row" id="user-row">
-        <div class="user-avatar" id="user-avatar">?</div>
-        <div class="user-info">
-          <span class="user-name" id="user-name">Demo</span>
-          <span class="user-streak" id="user-streak">0 day streak</span>
+    <!-- USER -->
+    <div class="sb-footer">
+      <button class="nav-btn" data-view="settings"><i class="bi bi-gear nav-ico"></i><span class="nav-lbl">Settings</span></button>
+      <div class="sb-user" id="sb-user">
+        <div class="sb-avatar" id="sb-avatar">?</div>
+        <div class="sb-user-info">
+          <span class="sb-user-name" id="sb-user-name">—</span>
+          <span class="sb-user-sub">Pro Account</span>
         </div>
       </div>
     </div>
   </aside>
 
-  <main id="main-content" class="main-content">
-    <div id="toolbar" class="toolbar">
-      <div class="tb-left">
-        <button id="add-node-btn" class="tb-primary" title="N">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          New Node
-        </button>
-        <button id="focus-mode-btn" class="tb-btn" title="F">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 9V6a1 1 0 011-1h3M3 15v3a1 1 0 001 1h3M21 9V6a1 1 0 00-1-1h-3M21 15v3a1 1 0 01-1 1h-3"/></svg>
-          Focus
-        </button>
-      </div>
-      <div class="tb-center">
-        <button id="cmd-palette-trigger" class="tb-search">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <span>Search or command…</span>
-          <kbd>⌘K</kbd>
-        </button>
-      </div>
-      <div class="tb-right">
-        <div class="zoom-controls">
-          <button id="zoom-out-btn" class="tb-icon">−</button>
-          <span id="zoom-label" class="zoom-label">100%</span>
-          <button id="zoom-in-btn" class="tb-icon">+</button>
-          <button id="zoom-fit-btn" class="tb-icon" title="Fit view">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M8 21H5a2 2 0 01-2-2v-3M16 21h3a2 2 0 002-2v-3"/></svg>
-          </button>
+  <!-- MAIN -->
+  <main id="main" class="main">
+
+    <!-- WORKSPACE SUBNAV (shown when workspace active) -->
+    <div id="ws-subnav" class="ws-subnav hidden">
+      <div class="ws-subnav-left">
+        <div id="ws-title-bar" class="ws-title-bar">
+          <i class="bi ws-title-icon" id="ws-title-icon"></i>
+          <span id="ws-title-name">Workspace</span>
         </div>
-        <div class="tb-sep"></div>
-        <div class="tb-sep"></div>
-        <button id="theme-cycle-btn" class="tb-icon" title="Cycle theme">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-        </button>
-        <div id="save-dot" class="save-dot" title="Sync status"></div>
+        <div class="ws-tabs" id="ws-tabs">
+          <button class="ws-tab active" data-tab="roadmap"><i class="bi bi-diagram-2"></i> Roadmap</button>
+          <button class="ws-tab" data-tab="timeline"><i class="bi bi-list-columns-reverse"></i> Timeline</button>
+          <button class="ws-tab" data-tab="kanban"><i class="bi bi-kanban"></i> Kanban</button>
+          <button class="ws-tab" data-tab="analytics"><i class="bi bi-activity"></i> Analytics</button>
+          <button class="ws-tab" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</button>
+        </div>
+      </div>
+      <div class="ws-subnav-right">
+        <button id="ws-add-node-btn" class="btn-primary btn-sm"><i class="bi bi-plus-lg"></i> New Node</button>
+        <button id="ws-share-btn" class="btn-ghost btn-sm" title="Share roadmap"><i class="bi bi-share"></i></button>
+        <button id="ws-delete-btn" class="btn-ghost btn-sm btn-danger-ghost" title="Delete workspace"><i class="bi bi-trash3"></i></button>
       </div>
     </div>
 
-    <div id="canvas-view" class="canvas-wrap">
-      <canvas id="mini-map" class="mini-map"></canvas>
-      <div id="canvas-container" class="canvas-container">
-        <div id="canvas-world" class="canvas-world">
-          <svg id="connections-svg" class="connections-svg"></svg>
-        </div>
-      </div>
-      <div id="tree-tabs" class="tree-tabs"></div>
-      <div class="canvas-hint">Scroll to zoom · Drag canvas to pan · Click node to edit</div>
-      <div id="canvas-empty" class="canvas-empty hidden">
-        <div class="empty-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="5" y2="17"/><line x1="12" y1="7" x2="19" y2="17"/></svg>
-        </div>
-        <h2>Build your roadmap</h2>
-        <p>Create your first goal node and start mapping your strategy.</p>
-        <button class="tb-primary" id="canvas-empty-btn">+ Create First Node</button>
+    <!-- TOP BAR (global views) -->
+    <div id="global-topbar" class="global-topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-right">
+        <button id="cmd-trigger" class="topbar-search"><i class="bi bi-search"></i> <span>Search & commands…</span><kbd>⌘K</kbd></button>
+        <button id="theme-btn" class="topbar-btn" title="Theme"><i class="bi bi-palette"></i></button>
+        <div id="save-dot" class="save-dot"></div>
       </div>
     </div>
 
-    <div id="timeline-view" class="view-panel hidden">
-      <div class="view-header"><h1>Timeline</h1><p>Goals plotted across time</p></div>
-      <div id="timeline-content" class="timeline-content"></div>
+    <!-- VIEWS -->
+    <!-- Global Dashboard -->
+    <div id="view-global-dashboard" class="view-page active">
+      <div id="gd-content"></div>
     </div>
-    <div id="kanban-view" class="view-panel hidden">
-      <div class="view-header"><h1>Kanban Board</h1><p>Visual task flow</p></div>
-      <div id="kanban-board" class="kanban-board"></div>
+
+    <!-- Financial Overview -->
+    <div id="view-financial-overview" class="view-page">
+      <div class="fin-header">
+        <div>
+          <h1 class="page-title">Financial Intelligence</h1>
+          <p class="page-sub">Aggregated across all workspaces</p>
+        </div>
+        <div class="fin-filters" id="fin-filters">
+          <button class="filter-btn active" data-period="weekly">Weekly</button>
+          <button class="filter-btn" data-period="monthly">Monthly</button>
+          <button class="filter-btn" data-period="quarterly">Quarterly</button>
+          <button class="filter-btn" data-period="yearly">Yearly</button>
+          <button class="filter-btn" data-period="lifetime">Lifetime</button>
+        </div>
+      </div>
+      <div id="fin-overview-content"></div>
     </div>
-    <div id="analytics-view" class="view-panel hidden">
-      <div class="view-header"><h1>Analytics</h1><p>Progress insights</p></div>
-      <div id="analytics-content" class="analytics-content"></div>
+
+    <!-- Calendar -->
+    <div id="view-calendar" class="view-page">
+      <div class="page-header"><h1 class="page-title">Calendar</h1><p class="page-sub">EMI dates, milestones, and deadlines</p></div>
+      <div id="cal-content"></div>
     </div>
-    <div id="dashboard-view" class="view-panel hidden">
-      <div class="view-header"><h1>Dashboard</h1><p>Life progress at a glance</p></div>
-      <div id="dashboard-content" class="dashboard-content"></div>
+
+    <!-- Notifications -->
+    <div id="view-notifications" class="view-page">
+      <div class="page-header"><h1 class="page-title">Notifications</h1><button id="mark-all-read" class="btn-ghost btn-sm">Mark all read</button></div>
+      <div id="notif-list"></div>
     </div>
-    <div id="habits-view" class="view-panel hidden">
-      <div class="view-header"><h1>Habits</h1><p>Consistency compounds</p></div>
-      <div id="habits-content" class="habits-content"></div>
+
+    <!-- Search -->
+    <div id="view-search" class="view-page">
+      <div class="search-hero">
+        <div class="search-input-wrap"><i class="bi bi-search"></i><input id="search-input" type="text" placeholder="Search nodes, workspaces, transactions…" autocomplete="off"/></div>
+      </div>
+      <div id="search-results"></div>
     </div>
-    <div id="finance-view" class="view-panel hidden">
-      <div class="view-header"><h1>Finance</h1><p>Every rupee tracked</p></div>
-      <div id="finance-content" class="finance-content"></div>
+
+    <!-- Workspace: Roadmap -->
+    <div id="view-workspace-roadmap" class="view-page ws-view">
+      <div class="canvas-wrap" id="canvas-wrap">
+        <div class="canvas-container" id="canvas-container">
+          <div id="canvas-world" class="canvas-world">
+            <svg id="connections-svg" class="connections-svg"></svg>
+          </div>
+        </div>
+        <canvas id="mini-map" class="mini-map"></canvas>
+        <div class="canvas-hint">Scroll to zoom · Drag to pan · Click node to edit · Double-click to focus</div>
+        <div id="canvas-empty" class="canvas-empty hidden">
+          <div class="empty-icon"><i class="bi bi-diagram-2"></i></div>
+          <h3>Build your roadmap</h3>
+          <p>Create your first goal node to start mapping your strategy.</p>
+          <button class="btn-primary" id="canvas-empty-btn">+ Create First Node</button>
+        </div>
+      </div>
     </div>
-    <div id="stock-tracker-view" class="view-panel hidden">
-      <div class="view-header"><h1>Adobe Stock</h1><p>Portfolio growth engine</p></div>
-      <div id="stock-content" class="stock-content"></div>
+
+    <!-- Workspace: Timeline -->
+    <div id="view-workspace-timeline" class="view-page ws-view">
+      <div class="inner-view-pad"><div id="timeline-content"></div></div>
     </div>
-    <div id="youtube-tracker-view" class="view-panel hidden">
-      <div class="view-header"><h1>YouTube</h1><p>Channel milestones</p></div>
-      <div id="youtube-content" class="youtube-content"></div>
+
+    <!-- Workspace: Kanban -->
+    <div id="view-workspace-kanban" class="view-page ws-view">
+      <div class="inner-view-pad"><div id="kanban-board" class="kanban-board"></div></div>
     </div>
-    <div id="completed-view" class="view-panel hidden">
-      <div class="view-header"><h1>Completed</h1><p>Your wins</p></div>
-      <div id="completed-grid" class="node-grid"></div>
+
+    <!-- Workspace: Analytics -->
+    <div id="view-workspace-analytics" class="view-page ws-view">
+      <div class="inner-view-pad"><div id="ws-analytics-content"></div></div>
     </div>
-    <div id="settings-view" class="view-panel hidden">
-      <div class="view-header"><h1>Settings</h1></div>
-      <div id="settings-content" class="settings-content"></div>
+
+    <!-- Workspace: Dashboard -->
+    <div id="view-workspace-dashboard" class="view-page ws-view">
+      <div class="inner-view-pad"><div id="ws-dashboard-content"></div></div>
     </div>
+
+    <!-- Settings -->
+    <div id="view-settings" class="view-page">
+      <div class="page-header"><h1 class="page-title">Settings</h1></div>
+      <div id="settings-content"></div>
+    </div>
+
   </main>
 
-  <div id="detail-panel" class="detail-panel closed">
-    <div class="dp-header">
-      <div class="dp-type-pill" id="dp-type-pill">Goal</div>
-      <div style="display:flex;gap:4px">
-        <button id="dp-focus-btn" class="dp-icon-btn" title="Focus mode">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 9V6a1 1 0 011-1h3M3 15v3a1 1 0 001 1h3M21 9V6a1 1 0 00-1-1h-3M21 15v3a1 1 0 01-1 1h-3"/></svg>
-        </button>
-        <button id="dp-close-btn" class="dp-icon-btn">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+  <!-- NODE DETAIL PANEL -->
+  <div id="node-panel" class="node-panel closed">
+    <div class="np-header">
+      <div class="np-type-badge" id="np-type-badge"></div>
+      <div class="np-header-actions">
+        <button id="np-focus-btn" class="np-icon-btn" title="Focus"><i class="bi bi-fullscreen"></i></button>
+        <button id="np-close-btn" class="np-icon-btn"><i class="bi bi-x-lg"></i></button>
       </div>
     </div>
-    <div class="dp-body">
-      <input id="dp-title" type="text" class="dp-title-input" placeholder="Node title…" />
-      <div class="dp-section"><div class="dp-label">Type</div><div class="dp-type-grid" id="dp-type-grid"></div></div>
-      <div class="dp-section">
-        <div class="dp-label">Progress</div>
-        <div class="dp-progress-row">
-          <input id="dp-current" type="number" class="dp-num-input" placeholder="0" min="0" />
-          <span class="dp-slash">/</span>
-          <input id="dp-target" type="number" class="dp-num-input" placeholder="100" min="0" />
-          <span id="dp-unit" class="dp-unit-badge">units</span>
+    <div class="np-body" id="np-body">
+      <!-- Dynamic content injected by JS -->
+    </div>
+    <div class="np-footer">
+      <button id="np-save-btn" class="btn-primary btn-sm">Save Changes</button>
+      <button id="np-delete-btn" class="btn-ghost btn-sm btn-danger-ghost"><i class="bi bi-trash3"></i></button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- CANVAS TOOLBAR (shown only in roadmap) -->
+<div id="canvas-toolbar" class="canvas-toolbar hidden">
+  <button id="zoom-out-btn" class="ctb-btn">−</button>
+  <span id="zoom-label" class="zoom-label">100%</span>
+  <button id="zoom-in-btn" class="ctb-btn">+</button>
+  <button id="zoom-fit-btn" class="ctb-btn" title="Fit"><i class="bi bi-arrows-angle-expand"></i></button>
+</div>
+
+<!-- TRANSACTION MODAL -->
+<div id="tx-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-header"><h2 id="tx-modal-title">Log Transaction</h2><button class="modal-close" id="tx-modal-close"><i class="bi bi-x-lg"></i></button></div>
+    <div class="modal-body">
+      <div class="form-row"><label class="form-label">Amount *</label>
+        <div class="input-with-prefix">
+          <select id="tx-currency" class="form-select" style="width:90px;flex-shrink:0">
+            <option value="INR">₹ INR</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option>
+          </select>
+          <input id="tx-amount" type="number" class="form-input" placeholder="0.00" min="0" step="0.01"/>
         </div>
-        <div class="dp-bar-wrap"><div class="dp-bar-track"><div class="dp-bar-fill" id="dp-bar-fill"></div></div><span class="dp-pct" id="dp-pct">0%</span></div>
       </div>
-      <div class="dp-section dp-two-col">
-        <div><div class="dp-label">Priority</div><select id="dp-priority" class="dp-select"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="critical">🔴 Critical</option></select></div>
-        <div><div class="dp-label">Status</div><select id="dp-status" class="dp-select"><option value="active">Active</option><option value="paused">Paused</option><option value="blocked">Blocked</option><option value="completed">Completed</option></select></div>
-      </div>
-      <div class="dp-section dp-two-col">
-        <div><div class="dp-label">Category</div><input id="dp-category" class="dp-input" placeholder="Finance…" /></div>
-        <div><div class="dp-label">Due Date</div><input id="dp-due" type="date" class="dp-input" /></div>
-      </div>
-      <div class="dp-section"><div class="dp-label">Tags</div><input id="dp-tags" class="dp-input" placeholder="tag1, tag2" /></div>
-      <div class="dp-section"><div class="dp-label">Notes</div><textarea id="dp-notes" class="dp-textarea" placeholder="Strategy, context, next steps…"></textarea></div>
-      <div class="dp-section">
-        <div class="dp-label">Dependencies <span class="dp-hint">(unlocked when these complete)</span></div>
-        <div id="dp-deps-list" class="dp-deps-list"></div>
-        <select id="dp-add-dep" class="dp-select"><option value="">+ Add dependency…</option></select>
-      </div>
-      <div class="dp-section"><div class="dp-label">Parent Node</div><select id="dp-parent" class="dp-select"></select></div>
-      <div class="dp-section"><div class="dp-label">Mini Analytics</div><div id="dp-analytics" class="dp-analytics-box"></div></div>
-      <div class="dp-section"><div class="dp-label">Activity</div><div id="dp-activity" class="dp-activity-log"></div></div>
-      <div class="dp-actions">
-        <button id="dp-complete-btn" class="dp-complete-btn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Complete</button>
-        <button id="dp-save-btn" class="dp-save-btn">Save Changes</button>
-      </div>
-      <div class="dp-danger"><button id="dp-delete-btn" class="dp-delete-btn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete node</button></div>
+      <div class="form-row"><label class="form-label">Note</label><input id="tx-note" class="form-input" placeholder="e.g. Adobe Stock payment…"/></div>
+      <div class="form-row"><label class="form-label">Date</label><input id="tx-date" type="date" class="form-input"/></div>
     </div>
+    <div class="modal-footer"><button class="btn-ghost" id="tx-cancel">Cancel</button><button id="tx-save" class="btn-primary">Log</button></div>
   </div>
 </div>
 
+<!-- ADD NODE MODAL -->
+<div id="add-node-modal" class="modal-overlay hidden">
+  <div class="modal-card modal-wide">
+    <div class="modal-header"><h2>Create Node</h2><button class="modal-close" id="node-modal-close"><i class="bi bi-x-lg"></i></button></div>
+    <div class="modal-body">
+      <div class="form-row"><label class="form-label">Title *</label><input id="nm-title" class="form-input" placeholder="What's your goal?"/></div>
+      <div class="form-row"><label class="form-label">Node Type</label><div id="nm-type-grid" class="type-grid"></div></div>
+      <div class="form-grid-2">
+        <div class="form-row"><label class="form-label">Currency</label>
+          <select id="nm-currency" class="form-select"><option value="INR">₹ INR</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option></select>
+        </div>
+        <div class="form-row"><label class="form-label">Priority</label>
+          <select id="nm-priority" class="form-select"><option value="medium">Medium</option><option value="low">Low</option><option value="high">High</option><option value="critical">Critical</option></select>
+        </div>
+      </div>
+      <div class="form-row"><label class="form-label">Parent Node</label><select id="nm-parent" class="form-select"></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn-ghost" id="nm-cancel">Cancel</button><button id="nm-create" class="btn-primary">Create Node</button></div>
+  </div>
+</div>
+
+<!-- ADD WORKSPACE MODAL -->
+<div id="add-ws-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-header"><h2>New Workspace</h2><button class="modal-close" id="ws-modal-close"><i class="bi bi-x-lg"></i></button></div>
+    <div class="modal-body">
+      <div class="form-row"><label class="form-label">Name *</label><input id="ws-name" class="form-input" placeholder="e.g. Life Roadmap…"/></div>
+      <div class="form-row"><label class="form-label">Type</label>
+        <div id="ws-type-grid" class="ws-type-grid"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-ghost" id="ws-cancel">Cancel</button><button id="ws-create" class="btn-primary">Create</button></div>
+  </div>
+</div>
+
+<!-- COMMAND PALETTE -->
 <div id="cmd-overlay" class="cmd-overlay hidden">
   <div class="cmd-card">
-    <div class="cmd-input-row">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="cmd-input" type="text" class="cmd-input" placeholder="Search nodes, run commands…" autocomplete="off" />
-      <kbd>Esc</kbd>
-    </div>
+    <div class="cmd-input-row"><i class="bi bi-search"></i><input id="cmd-input" type="text" class="cmd-input" placeholder="Search nodes, run commands…" autocomplete="off"/><kbd>Esc</kbd></div>
     <div id="cmd-results" class="cmd-results"></div>
     <div class="cmd-footer"><span><kbd>↑↓</kbd> Navigate</span><span><kbd>↵</kbd> Select</span><span><kbd>Esc</kbd> Close</span></div>
   </div>
 </div>
 
-<div id="add-node-modal" class="modal-overlay hidden">
-  <div class="modal-card">
-    <div class="modal-header"><h2>Create Node</h2><button class="modal-close" id="modal-cancel"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body">
-      <div class="form-row"><label class="form-label">Title *</label><input id="modal-title" class="form-input" placeholder="What's your goal?" /></div>
-      <div class="form-row"><label class="form-label">Node Type</label><div class="modal-type-grid" id="modal-type-grid"></div></div>
-      <div class="form-grid-2">
-        <div class="form-row"><label class="form-label">Target Value</label><input id="modal-target" type="number" class="form-input" placeholder="100" /></div>
-        <div class="form-row"><label class="form-label">Category</label><input id="modal-category" class="form-input" placeholder="Finance…" /></div>
-      </div>
-      <div class="form-grid-2">
-        <div class="form-row"><label class="form-label">Currency</label>
-          <select id="modal-currency" class="form-select">
-            <option value="INR">₹ INR</option>
-            <option value="USD">$ USD</option>
-            <option value="EUR">€ EUR</option>
-            <option value="GBP">£ GBP</option>
-            <option value="AED">د.إ AED</option>
-            <option value="SGD">S$ SGD</option>
-          </select>
-        </div>
-        <div class="form-row"><label class="form-label">Parent Node</label><select id="modal-parent" class="form-select"></select></div>
-      </div>
-    </div>
-    <div class="modal-footer"><button class="tb-btn" id="modal-cancel-btn">Cancel</button><button id="modal-create-btn" class="tb-primary">Create Node</button></div>
-  </div>
-</div>
-
-<div id="add-tree-modal" class="modal-overlay hidden">
-  <div class="modal-card">
-    <div class="modal-header"><h2>New Workspace</h2><button class="modal-close" id="tree-modal-close"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body"><div class="form-row"><label class="form-label">Name *</label><input id="tree-modal-name" class="form-input" placeholder="e.g. Life Roadmap…" /></div></div>
-    <div class="modal-footer"><button class="tb-btn" id="tree-modal-cancel">Cancel</button><button id="tree-modal-create" class="tb-primary">Create</button></div>
-  </div>
-</div>
-
+<!-- FOCUS MODE -->
 <div id="focus-overlay" class="focus-overlay hidden">
   <div class="focus-backdrop"></div>
-  <div class="focus-panel">
-    <div class="focus-header">
-      <div class="focus-breadcrumb" id="focus-breadcrumb">Goal</div>
-      <button id="focus-close-btn" class="focus-close-btn">Exit Focus</button>
-    </div>
-    <div class="focus-body">
-      <div class="focus-left">
-        <div class="focus-title" id="focus-title"></div>
-        <div class="focus-type-badge" id="focus-type-badge"></div>
-        <div class="focus-ring-wrap">
-          <svg class="focus-ring-svg" viewBox="0 0 120 120">
-            <circle class="focus-ring-bg" cx="60" cy="60" r="52"/>
-            <circle class="focus-ring-arc" id="focus-ring-arc" cx="60" cy="60" r="52"/>
-          </svg>
-          <div class="focus-ring-pct" id="focus-ring-pct">0%</div>
-        </div>
-        <div class="focus-kpis" id="focus-kpis"></div>
-      </div>
-      <div class="focus-right">
-        <div class="focus-section-title">Child Goals</div>
-        <div id="focus-children" class="focus-children-list"></div>
-        <div class="focus-section-title" style="margin-top:24px">Notes</div>
-        <div id="focus-notes" class="focus-notes-box"></div>
-      </div>
-    </div>
+  <div class="focus-panel" id="focus-panel">
+    <div class="focus-header"><div class="focus-breadcrumb" id="focus-breadcrumb"></div><button id="focus-close" class="btn-ghost btn-sm">Exit Focus</button></div>
+    <div class="focus-body" id="focus-body"></div>
   </div>
 </div>
 
-<div id="celebration-overlay" class="celebration-overlay hidden">
-  <div class="celebration-inner">
-    <div class="cel-ring-wrap">
-      <svg viewBox="0 0 120 120" class="cel-ring-svg">
-        <circle class="cel-bg" cx="60" cy="60" r="52"/>
-        <circle class="cel-arc" cx="60" cy="60" r="52"/>
-      </svg>
-      <div class="cel-check">✓</div>
-    </div>
-    <h2 id="cel-title">Goal Achieved!</h2>
-    <p id="cel-sub">You're building something extraordinary.</p>
-    <div id="cel-confetti" class="cel-confetti"></div>
+<!-- CELEBRATION -->
+<div id="cel-overlay" class="cel-overlay hidden">
+  <div class="cel-inner">
+    <div class="cel-ring-wrap"><svg viewBox="0 0 120 120" class="cel-svg"><circle class="cel-bg" cx="60" cy="60" r="52"/><circle class="cel-arc" cx="60" cy="60" r="52"/></svg><div class="cel-check">✓</div></div>
+    <h2 id="cel-title">Goal Achieved!</h2><p id="cel-sub">You're building something extraordinary.</p>
   </div>
 </div>
 
+<!-- TOASTS -->
 <div id="toast-container" class="toast-container"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
